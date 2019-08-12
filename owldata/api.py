@@ -36,13 +36,115 @@ class _Check_dir():
 # BLOCK 商品資訊
 # --------------------
 # 取得函數與商品對應表
+class _DataID():
+    def __init__(self):
+        # 商品表
+        self._fp = ''
+        
+        # 商品時間對照表
+        self._table = ''
+        
+    # 取得函數與商品對應表
+    def _pdid_map(self):
+        '''
+        擷取商品函數與商品ID表
+        Returns
+        ----------
+        :DataFrame:
+            FuncID          PdID
+            ssp 	PYPRI-14776a
+            msp 	PYPRI-14777b
+            sby		PYBAL-14782a
+            sbq		PYBAL-14780a
+        
+        [Notes]
+        ----------
+        FuncID: ssp-個股股價, msp-多股股價, sby-年度資產負債表(個股), sbq-季度資產負債表(個股)
+        PdID: 商品對應的ID
+        '''
+        get_data_url = self._token['data_url'] + self._token['ctrlmap']
+        
+        self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
+        return self._fp
+    
+    # 取得函數對應商品
+    def _get_pdid(self, funcname):
+        return self._fp.loc[funcname][0]
+    
+    # 商品時間
+    def _date_table(self):
+        get_data_url = self._token['data_url'] + 'A2-10628a/' + "TWA00/" + "1000"
+        self._table = self._data_from_owl(get_data_url)
+        return self._table
+    
+    def _season_to_day(self, day):
+        if day == '01':
+            return '0331'
+        elif day == '02':
+            return '0630'
+        elif day == '03':
+            return '0930'
+        elif day == '04':
+            return '1231'
+        else:
+            return ''
+        
+    def _day_to_season(self, season):
+        if season == 1:
+            return '0331'
+        elif season == 2:
+            return '0630'
+        elif season == 3:
+            return '0930'
+        elif season == 4:
+            return '1231'
+        else:
+            return ''
+        
+    def _date_freq(self, start, end, freq = 'd'):
+        self._date_table()
+        
+        if freq.lower() == 'd':
+
+            date = pd.date_range(start, end, freq = freq.upper())
+            user_time = date & self._table['日期']
+            return str(len(user_time))
+        
+        elif freq.lower() == 'm':
+            if len(start) or len(end) == 4:
+                start = start + '05'
+                end = end + '05'
+                date = pd.date_range(start, end, freq = freq.upper()  + 'S').strftime('%Y%m')
+                user_time = date & self._table['日期'].apply(lambda x: x[:4] + x[4:6]).unique()
+                return str(len(user_time))
+            else:
+                print('輸入格式錯誤, 請輸入 yyymm')
+                return None
+        
+        elif freq.lower() == 'q':
+            if (start[4:6] not in ['01', '02', '03', '04']):
+                print('格式輸入錯誤, 請輸入 yyyqq, ex:201903 = 2019Q3')
+                return None
+            start = start[:4] + self._season_to_day(start[4:6])
+            end = end[:4] + self._season_to_day(end[4:6])
+            date = pd.date_range(start, end, freq= freq.upper())
+            
+            usertable = (self._table['日期']).apply(lambda x: x[:4]) + self._day_to_season(pd.to_datetime(self._table['日期']).dt.quarter).astype('str')
+            user_time = date & usertable.unique()
+            return str(len(user_time))
+
+        elif freq.lower() == 'y':
+            date = pd.date_range(start, end, freq = "M").strftime('%Y').unique()
+            user_time = date & self._table['日期'].apply(lambda x: x[:4]).unique()
+            return str(len(user_time))
+            
 
 
 # --------------------
 # BLOCK API擷取資料
 # --------------------
 # 核心程式
-class OwlData():  
+class OwlData(_DataID):  
     def __init__(self, auid, ausrt):
         '''
         Please insert your personal information
@@ -69,27 +171,31 @@ class OwlData():
             'ctrlmap':"PYCtrl-14778b"
         }
         
-        # 商品對應表
-        self._Func_Prod = ''
-        
         # 取得 TOKEN 結果
         self._token_result = ''
         
         # data token
         self._data_headers = {}
         
+        # 連線進入並輸出連線狀態
+        self.status_code = self._request_token_authorization()
+        
+        # 建立時間表
+        
+        
     def __repr__(self):
         return '歡迎使用數據貓頭鷹資料庫'
-        
+    
+    # FIXME #TODO 建立 HTTP error 表
     def _request_token_authorization(self):
         self._token_result = requests.request("POST",self._token['token_url'],
                                         data = self._token['token_params'],
                                         headers = self._token['token_headers'])
-        # FIXME #TODO 建立 HTTP error 表
+
         if (self._token_result.status_code == 200):    
             token = json.loads(self._token_result.text).get("token")
-            self._data_headers = {'authorization':'Bearer '+token}
-            self.pdid_map()
+            self._data_headers = {'authorization':'Bearer ' + token}
+            self._pdid_map()
             return self._token_result.status_code
 
         elif(self._token_result.status_code == 401):
@@ -98,50 +204,7 @@ class OwlData():
         else:
             print("連線錯誤，請洽業務人員")
 
-    # 取得函數與商品對應表
-    def pdid_map(self):
-        '''
-        擷取商品函數與商品ID表
-        Returns
-        ----------
-        :DataFrame:
-            FuncID          PdID
-            ssp 	PYPRI-14776a
-            msp 	PYPRI-14777b
-            sby		PYBAL-14782a
-            sbq		PYBAL-14780a
-        
-        [Notes]
-        ----------
-        FuncID: ssp-個股股價, msp-多股股價, sby-年度資產負債表(個股), sbq-季度資產負債表(個股)
-        PdID: 商品對應的ID
-        '''
-        get_data_url=self._token['data_url']+self._token['ctrlmap']
-        self._Func_Prod=self._data_from_owl(get_data_url).set_index("FuncID")
-        return self._Func_Prod
-
-    # 取得函數對應商品
-    def _get_pdid(self, funcname):
-        '''
-        依據FuncID抓取PdID
-        Parameters
-        -----------
-        :param funcname: str
-            在funcname輸入FuncID，回傳商品的ID
-
-        Returns
-        ----------
-        :str: 輸出的資料型態
-            PYPRI-14776a
-
-        Examples
-        ----------
-        In: get_pdid("ssp")
-            Out: PYPRI-14776a    
-        '''        
-        return self._Func_Prod.loc[funcname][0]
-
-    #呼叫OWL取回資料
+    # 呼叫OWL取回資料
     def _data_from_owl(self, url:str) -> "dataframe":
         '''
         輸入API網址，獲取對應的數據資料
@@ -182,6 +245,8 @@ class OwlData():
         個股: 假設基準日: 20190701、股票代號: 1101、期數: 20，則會撈取自20190701往前20筆 1101的資料
         多股: 取指定日期當天，各檔的數據資料
         '''
+        
+        
         data_result = requests.request('GET', url, headers = self._data_headers)
         if (data_result.status_code == 200):
             data=json.loads(data_result.text)
@@ -190,48 +255,54 @@ class OwlData():
             #print(OwlError._http_error[data_result.status_code])
             return 'err'
 
-    #單股歷史股價(single stock price)
+    # 個股日收盤行情 (single stock price)
     def ssp(self, sid, bpd, epd, colist = ""):
         '''
         Parameters
         ----------
         :param sid: str
             - 台股股票代號
+            
         :param bpd: str
             - 起始日，格式:yyyymmdd 8碼
+            
         :param epd: str
             - 結束日，格式:yyyymmdd 8碼
+            
         :param colist: list
-            - 欄位名稱，以list的格式，填入欲查看的欄位名稱，未寫colist參數或list為空時，取全部的欄位
+            - 填入欲查看的欄位名稱，未寫colist參數或list為空時，則取全部的欄位
+            
         Returns
         ----------
         DataFrame: 
         
-            日期       開盤價    收盤價
+            日期       開盤價    收盤價     ....
             20190807   43.40     43.35
             20190806   43.00     43.30
             20190805   43.50     43.55
             20190802   43.85     43.55
-            20190801   44.50     44.05
         
         [Notes]
         ----------
         '''
-        if self._request_token_authorization() == 200:
+        if self.status_code == 200:
             try:
                 if len(bpd) == 8 and len(epd) == 8:
                     PdID = self._get_pdid("ssp")
-                    dt = _owltime._count_dates(bpd,epd)
+                    dt = self._date_freq(bpd, epd, 'd')
                     if (dt != "err"):
                         # 獲取資料
-                        get_data_url = self._token['data_url']+"date/"+epd+"/"+PdID+"/"+sid+"/"+dt
+                        get_data_url = self._token['data_url']+"date/" + epd + "/" + PdID + "/" + sid + "/" + dt
                         result = self._data_from_owl(get_data_url)
+                        
                         if result.empty:
                             print(OwlError._dicts["SidError"])
                         else:
                             # 利用欄位擷取資料
                             if (len(colist)>0):
                                 result = result[colist]
+                                result.iloc[2:] = result.iloc[2:].apply(pd.to_numeric)
+                                
                             return result
                 else:
                     print(OwlError._dicts["DayError"])
@@ -240,7 +311,7 @@ class OwlData():
             except Exception:
                 print(OwlError._dicts["PdError"]+"("+PdID+")/"+OwlError._dicts["ValueError"])
 
-    # 多股全部股價(multi stock price)
+    # 多股每日收盤行情 (multi stock price)
     def msp(self, dt, colist = ""):
         '''
         
@@ -248,18 +319,20 @@ class OwlData():
         ----------
         :param dt: str
             - 輸入某一天日期代碼，格式:yyyymmdd 8碼
+            
         :param colist: list
-            - 欄位名稱，以list的格式，填入欲查看的欄位名稱，未寫colist參數或list為空時，取全部的欄位
+            - 填入欲查看的欄位名稱，未寫colist參數或list為空時，取全部的欄位
         
         Returns
         ----------
         DataFrame: 
         
+        
         [Notes]
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(dt)==8:
                     PdID = self._get_pdid("msp")
@@ -287,18 +360,28 @@ class OwlData():
                 except:
                     print(OwlError._dicts["ColumnsError"])
 
-    # 單股資產負債表歷史資料 (Balance sheet single)
+    # TODO #FIXME 不知道這英文是什麼!
+    # 個股財務簡表 (Single Financial Statements)
     def fis(self, di, sid, bpd, epd, colist = ""):
         '''
         
         Parameters
         ----------
-        :param 
-            -
-        :param 
-            -
-        :param 
-            -
+        :param di: str
+            - 查詢資料時間頻率，y = 年度, q = 季度, m = 月
+            
+        :param sid: str
+            - 台股股票代號
+            
+        :param bpd: str
+            - 起始日，格式:yyyymmdd 8碼
+            
+        :param epd: str
+            - 結束日，格式:yyyymmdd 8碼
+            
+        :param colist: list
+            - 填入欲查看的欄位名稱，未寫colist參數或list為空時，則取全部的欄位
+            - ['年度', '流動資產', '非流動資產', '資產總計', '流動負債', '非流動負債', '負債總計', '權益總計', '公告每股淨值', '營業收入(千)', '營業成本(千)', '營業毛利(千)', '營業費用(千)', '營業利益(千)', '營業外收入及支出(千)', '稅前純益(千)', '所得稅(千)', '稅後純益歸屬(千)', '每股盈餘(元)', '營業活動現金流量(千)', '投資活動現金流量(千)', '籌資活動現金流量(千)', '本期現金及約當現金增減數(千)', '期末現金及約當現金餘額(千)', '自由現金流量(千)']
         
         Returns
         ----------
@@ -307,12 +390,12 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if (di == "Y" or di == "y"):  #判斷要查詢的資料是年度或季度
                     if len(bpd)==4 and len(epd)==4:
                         PdID=self._get_pdid("sby")
-                        dt=_owltime._count_dates(bpd,epd)
+                        dt=self._date_freq(bpd,epd)
                         if(dt!="err"):
                             get_data_url=self._token['data_url']+"date/"+epd+"0101/"+PdID+"/"+sid+"/"+dt
                             result=self._data_from_owl(get_data_url)
@@ -328,7 +411,7 @@ class OwlData():
                     if len(bpd)==6 and len(epd)==6:
                         if (int(bpd[4:6])>=1 and int(bpd[4:6])<=4) and int(epd[4:6])>=1 and int(epd[4:6])<=4:
                             PdID=self._get_pdid("sbq")
-                            dt=_owltime._count_dates(bpd, epd, trans = 's')
+                            dt=self._date_freq(bpd, epd, trans = 's')
                             if(dt!="err"):
                                 get_data_url=self._token['data_url']+"date/"+epd+"01/"+PdID+"/"+sid+"/"+dt
                                 result=self._data_from_owl(get_data_url)
@@ -346,7 +429,7 @@ class OwlData():
                     if len(bpd)==6 and len(epd)==6:
                         if (int(bpd[4:6])>=1 and int(bpd[4:6])<=12) and (int(epd[4:6])>=1 and int(epd[4:6])<=12):
                             PdID=self._get_pdid("sbm")
-                            dt=_owltime._count_dates(bpd, epd, trans = 'm')
+                            dt=self._date_freq(bpd, epd, trans = 'm')
                             if(dt!="err"):
                                 get_data_url=self._token['data_url']+"date/"+epd+"01/"+PdID+"/"+sid+"/"+dt
                                 result=self._data_from_owl(get_data_url)
@@ -386,7 +469,7 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if (di == "Y" or di == "y"):
                     if len(dt) == 4:
@@ -474,11 +557,11 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(bpd)==8 and len(epd)==8:
                     PdID=self._get_pdid("sch")
-                    dt=_owltime._count_dates(bpd,epd)
+                    dt=self._date_freq(bpd,epd)
                     if (dt!="err"):
                         get_data_url=self._token['data_url']+"date/"+epd+"/"+PdID+"/"+sid+"/"+dt
                         result=self._data_from_owl(get_data_url)
@@ -514,7 +597,7 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(dt)==8:
                     PdID=self._get_pdid("mch")
@@ -555,11 +638,11 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(bpd)==8 and len(epd)==8:
                     PdID=self._get_pdid("sth")
-                    dt=_owltime._count_dates(bpd,epd)
+                    dt=self._date_freq(bpd,epd)
                     if (dt!="err"):
                         get_data_url=self._token['data_url']+"date/"+epd+"/"+PdID+"/"+sid+"/"+dt
                         result=self._data_from_owl(get_data_url)
@@ -575,7 +658,7 @@ class OwlData():
                 print(OwlError._dicts["ColumnsError"])
             except Exception:
                     print(OwlError._dicts["PdError"]+"("+PdID+")/"+OwlError._dicts["ValueError"])
-
+   
     # 技術指標 多股 (Technical indicators multi) 
     def tim(self, dt, colist = ""):
         '''
@@ -596,7 +679,7 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(dt)==8:
                     PdID=self._get_pdid("mth")
@@ -617,6 +700,7 @@ class OwlData():
                     return result
                 except:
                     print(OwlError._dicts["ColumnsError"])
+    
     # 公司基本資料 多股 (Company information multi)
     def cim(self, colist = ""):
         '''
@@ -637,7 +721,7 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 PdID=self._get_pdid("mcm")
                 get_date_url=self._token['data_url']+PdID
@@ -655,6 +739,7 @@ class OwlData():
                     return result
                 except:
                     print(OwlError._dicts["ColumnsError"])
+    
     # 股利政策 個股 (Dividend policy single)
     def dps(self, sid, bpd, epd, colist = ""):
         '''
@@ -675,11 +760,11 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(bpd)==4 and len(epd)==4:
                     PdID=self._get_pdid("scm1")
-                    dt=_owltime._count_dates(bpd,epd)
+                    dt=self._date_freq(bpd,epd)
                     if (dt!="err"):
                         get_data_url=self._token['data_url']+"date/"+epd+"0101/"+PdID+"/"+sid+"/"+dt
                         result=self._data_from_owl(get_data_url)
@@ -695,6 +780,7 @@ class OwlData():
                 print(OwlError._dicts["ColumnsError"])
             except Exception:
                 print(OwlError._dicts["PdError"]+"("+PdID+")")
+    
     # 股利政策 多股 (Dividend policy multi)    
     def dpm(self, dt, colist = ""):
         '''
@@ -715,7 +801,7 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(dt)==4:
                     PdID=self._get_pdid("mcm1")
@@ -736,6 +822,7 @@ class OwlData():
                     return result
                 except:
                     print(OwlError._dicts["ColumnsError"])
+    
     # 除權除息 個股 (Exemption Dividend policy single)
     def edps(self, sid, bpd, epd, colist = ""):
         '''
@@ -756,11 +843,11 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(bpd)==4 and len(epd)==4:
                     PdID=self._get_pdid("scm2")
-                    dt=_owltime._count_dates(bpd,epd)
+                    dt=self._date_freq(bpd,epd)
                     if (dt!="err"):
                         get_data_url=self._token['data_url']+"date/"+epd+"0101/"+PdID+"/"+sid+"/"+dt
                         result=self._data_from_owl(get_data_url)
@@ -776,6 +863,7 @@ class OwlData():
                 print(OwlError._dicts["ColumnsError"])
             except Exception:
                 print(OwlError._dicts["PdError"]+"("+PdID+")")
+    
     # 除權除息 多股 (Exemption Dividend policy multi)    
     def edpm(self, dt, colist = ""):
         '''
@@ -796,7 +884,7 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 if len(dt)==4:
                     PdID=self._get_pdid("mcm2")
@@ -817,6 +905,7 @@ class OwlData():
                     return result
                 except:
                     print(OwlError._dicts["ColumnsError"])
+    
     # 即時報價 (Timely stock price)
     def tsp(self, sid, colist = ""):
         '''
@@ -837,7 +926,7 @@ class OwlData():
         ----------
         
         '''
-        if self._request_token_authorization()==200:
+        if self.status_code==200:
             try:
                 PdID=self._get_pdid("mnp")
                 get_data_url=self._token['data_url']+PdID+"/"+sid
@@ -852,5 +941,5 @@ class OwlData():
                 print(OwlError._dicts["ColumnsError"])
             except Exception:
                 print(OwlError._dicts["PdError"]+"("+PdID+")")
-                
+
 

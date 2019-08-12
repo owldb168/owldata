@@ -7,13 +7,13 @@
 
 # =====================================================================
 
-from .api import OwlData as app
+from .api import OwlData
 
 __docformat__ = 'restructuredtext'
 __doc__ = '''
-owl-api: 協助大家研究分析得好夥伴
+owldata: 協助大家研究分析得好夥伴
 ==============================
 
-**owl-api** 提供一個穩定且快速的介面獲取數據貓頭鷹任何資料
+**owldata** 提供一個穩定且快速的介面獲取數據貓頭鷹任何資料
 
 '''
