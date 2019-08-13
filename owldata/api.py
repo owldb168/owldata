@@ -89,55 +89,51 @@ class _DataID():
         else:
             return ''
         
-    def _day_to_season(self, season):
-        if season == 1:
-            return '0331'
-        elif season == 2:
-            return '0630'
-        elif season == 3:
-            return '0930'
-        elif season == 4:
-            return '1231'
-        else:
-            return ''
-        
     def _date_freq(self, start, end, freq = 'd'):
         self._date_table()
         
         if freq.lower() == 'd':
-
             date = pd.date_range(start, end, freq = freq.upper())
             user_time = date & self._table['日期']
             return str(len(user_time))
         
         elif freq.lower() == 'm':
-            if len(start) or len(end) == 4:
+            if len(start) or len(end) == 6:
                 start = start + '05'
                 end = end + '05'
                 date = pd.date_range(start, end, freq = freq.upper()  + 'S').strftime('%Y%m')
                 user_time = date & self._table['日期'].apply(lambda x: x[:4] + x[4:6]).unique()
                 return str(len(user_time))
             else:
-                print('輸入格式錯誤, 請輸入 yyymm')
+                print('輸入格式錯誤, 請輸入 yyyymm')
                 return None
         
         elif freq.lower() == 'q':
-            if (start[4:6] not in ['01', '02', '03', '04']):
-                print('格式輸入錯誤, 請輸入 yyyqq, ex:201903 = 2019Q3')
+            if (start[4:6] not in ['01', '02', '03', '04']) or (end[4:6] not in ['01', '02', '03', '04']):
+                print('格式輸入錯誤, 請輸入 yyyyqq, ex:201903 = 2019Q3')
                 return None
+            
             start = start[:4] + self._season_to_day(start[4:6])
             end = end[:4] + self._season_to_day(end[4:6])
-            date = pd.date_range(start, end, freq= freq.upper())
             
-            usertable = (self._table['日期']).apply(lambda x: x[:4]) + self._day_to_season(pd.to_datetime(self._table['日期']).dt.quarter).astype('str')
-            user_time = date & usertable.unique()
+            date = pd.period_range(start, end, freq= freq.upper()).strftime('%Y0%q')
+            usertable  = self._table['日期'].apply(lambda x: x[:4] + '0' + str(pd.to_datetime(x).quarter))
+            user_time = usertable[usertable.isin(date)].unique()
             return str(len(user_time))
 
         elif freq.lower() == 'y':
-            date = pd.date_range(start, end, freq = "M").strftime('%Y').unique()
-            user_time = date & self._table['日期'].apply(lambda x: x[:4]).unique()
-            return str(len(user_time))
-            
+            if len(start) == 4 and len(end) == 4:
+                if int(self._table['日期'][0][:4]) >= int(end):
+                    diff = int(end) - int(start)
+                    if (diff >= 0):
+                        return str(diff+1)
+                else:
+                    diff = int(int(self._table['日期'][0][:4])) - int(start)
+                    if (diff >= 0):
+                        return str(diff+1)
+            else:
+                print('格式錯誤')
+                return ''
 
 
 # --------------------
