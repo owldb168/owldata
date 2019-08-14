@@ -266,6 +266,8 @@ class OwlData(_DataID):
     # 個股日收盤行情 (Single Stock Price)
     def ssp(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
         '''
+        依指定日期區間，撈取指定股票代號的股價資訊
+        
         Parameters
         ----------
         :param sid: str
@@ -284,14 +286,10 @@ class OwlData(_DataID):
         ----------
         DataFrame
         
-            日期       開盤價    收盤價     ....
-            20190807   43.40     43.35
-            20190806   43.00     43.30
-            20190805   43.50     43.55
-            20190802   43.85     43.55
-        
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
+        
         '''
         try:
             pdid = self._get_pdid("ssp")
@@ -309,6 +307,7 @@ class OwlData(_DataID):
     # 多股每日收盤行情 (Multi Stock Price)
     def msp(self, dt:str, colist = None) -> 'DataFrame':
         '''
+        依指定日期，撈取全上市櫃台股的股價資訊
         
         Parameters
         ----------
@@ -324,7 +323,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
-        
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         '''
         try:
             pdid = self._get_pdid("msp")
@@ -338,11 +337,13 @@ class OwlData(_DataID):
     # 個股財務簡表 (Financial Statements Single )
     def fis(self, di:str, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
         '''
+        依據 di 決定查詢資料頻率，並依股票代號，撈取指定區間的財務報表資訊
+        y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
         
         Parameters
         ----------
         :param di: str
-            - 查詢資料時間頻率，y = 年度, q = 季度, m = 月
+            - 查詢資料時間頻率，y = 年度, q = 季度, m = 月份
             
         :param sid: str
             - 台股股票代號
@@ -355,7 +356,8 @@ class OwlData(_DataID):
             
         :param colist: list
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
-            - ['年度', '流動資產', '非流動資產', '資產總計', '流動負債', '非流動負債', '負債總計', '權益總計', '公告每股淨值', '營業收入(千)', '營業成本(千)', '營業毛利(千)', '營業費用(千)', '營業利益(千)', '營業外收入及支出(千)', '稅前純益(千)', '所得稅(千)', '稅後純益歸屬(千)', '每股盈餘(元)', '營業活動現金流量(千)', '投資活動現金流量(千)', '籌資活動現金流量(千)', '本期現金及約當現金增減數(千)', '期末現金及約當現金餘額(千)', '自由現金流量(千)']
+            - y and q : ['年度', '流動資產', '非流動資產', '資產總計', '流動負債', '非流動負債', '負債總計', '權益總計', '公告每股淨值', '營業收入(千)', '營業成本(千)', '營業毛利(千)', '營業費用(千)', '營業利益(千)', '營業外收入及支出(千)', '稅前純益(千)', '所得稅(千)', '稅後純益歸屬(千)', '每股盈餘(元)', '營業活動現金流量(千)', '投資活動現金流量(千)', '籌資活動現金流量(千)', '本期現金及約當現金增減數(千)', '期末現金及約當現金餘額(千)', '自由現金流量(千)']
+            - m : ['股票代號','股票名稱','年月','單月合併營收(千)','去年同期(千)','單月合併營收年成長(%)','單月合併營收月變動(%)','累計合併營收(千)','去年同期(千)1','累計合併營收成長(%)']
         
         Returns
         ----------
@@ -363,6 +365,9 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 季度日期格式 yyyqq, 其中 qq 請輸入 01 - 04, 分別表示為第一季至第四季 
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
+        - 參數 di 大小寫無異
         
         '''
         try:
@@ -392,6 +397,8 @@ class OwlData(_DataID):
     # 多股財務簡表 (Financial Statements Multi)
     def fim(self, di:str, dt:str, colist = None) -> 'DataFrame':
         '''
+        依據 di 決定查詢資料頻率，並依指定區間，撈取全上市櫃台股的財務報表資訊
+        y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊        
         
         Parameters
         ----------
@@ -406,6 +413,8 @@ class OwlData(_DataID):
             
         :param colist: list, default None
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
+            - y and q : ['年度', '流動資產', '非流動資產', '資產總計', '流動負債', '非流動負債', '負債總計', '權益總計', '公告每股淨值', '營業收入(千)', '營業成本(千)', '營業毛利(千)', '營業費用(千)', '營業利益(千)', '營業外收入及支出(千)', '稅前純益(千)', '所得稅(千)', '稅後純益歸屬(千)', '每股盈餘(元)', '營業活動現金流量(千)', '投資活動現金流量(千)', '籌資活動現金流量(千)', '本期現金及約當現金增減數(千)', '期末現金及約當現金餘額(千)', '自由現金流量(千)']
+            - m : ['股票代號','股票名稱','年月','單月合併營收(千)','去年同期(千)','單月合併營收年成長(%)','單月合併營收月變動(%)','累計合併營收(千)','去年同期(千)1','累計合併營收成長(%)']
         
         Returns
         ----------
@@ -413,7 +422,10 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
-            - 資料時間頻率會影響交易日期
+        - 季度日期格式 yyyqq, 其中 qq 請輸入 01 - 04, 分別表示為第一季至第四季 
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
+        - 參數 di 大小寫無異
+        
         '''
         try:
             if di.lower() == 'y':
@@ -447,6 +459,7 @@ class OwlData(_DataID):
     # 法人籌碼個股歷史資料 (Corporate Chip Single)
     def chs(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
         '''
+        依指定日期區間，撈取指定股票的三大法人買賣狀況和該股票的融資券狀況
         
         Parameters
         ----------
@@ -468,6 +481,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
         '''
         try:
@@ -486,6 +500,7 @@ class OwlData(_DataID):
     # 法人籌碼多股歷史資料 (Corporate Chip Multi)
     def chm(self, dt:str, colist = None) -> 'DataFrame':
         '''
+        查詢指定日期，全上市櫃台股的三大法人買賣狀況和融資券狀況
         
         Parameters
         ----------
@@ -501,6 +516,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
         '''
         try:
@@ -518,6 +534,7 @@ class OwlData(_DataID):
     # 技術指標 個股 (Technical indicators Single)
     def tis(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
         '''
+        依指定日期區間，撈取指定股票的技術指標數值
         
         Parameters
         ----------
@@ -539,6 +556,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
         '''
         try:
@@ -557,6 +575,7 @@ class OwlData(_DataID):
     # 技術指標 多股 (Technical indicators Multi) 
     def tim(self, dt:str, colist = None) -> 'DataFrame':
         '''
+        查詢指定日期，全上市櫃台股的技術指標數值
         
         Parameters
         ----------
@@ -572,6 +591,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
         '''
         try:
@@ -589,6 +609,7 @@ class OwlData(_DataID):
     # 公司基本資料 多股 (Company information Multi)
     def cim(self, colist = None) -> 'DataFrame':
         '''
+        撈取上市櫃台股的公司基本資料
         
         Parameters
         ----------
@@ -601,6 +622,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
         '''
         
@@ -618,6 +640,7 @@ class OwlData(_DataID):
     # 股利政策 個股 (Dividend Policy Single)
     def dps(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
         '''
+        依據指定年度區間，撈取指定股票的配發股利狀況表
         
         Parameters
         ----------
@@ -625,10 +648,10 @@ class OwlData(_DataID):
             - 台股股票代號
             
         :param bpd: str
-        - 指定一個交易起始日，格式:yyyymmdd 8碼
+        - 指定一個交易起始日，格式:yyyy 4碼
             
         :param epd: str
-            - 指定一個交易結束日，格式:yyyymmdd 8碼
+            - 指定一個交易結束日，格式:yyyy 4碼
             
         :param colist: list, default None
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
@@ -639,6 +662,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
         '''
         try:
@@ -657,11 +681,12 @@ class OwlData(_DataID):
     # 股利政策 多股 (Dividend Policy Multi)    
     def dpm(self, dt:str, colist = None) -> 'DataFrame':
         '''
+        依指定年度，撈取全上市櫃台股的配發股利狀況表
         
         Parameters
         ----------
         :param dt: str
-            - 指定一個交易日期，格式:yyyymmdd，8碼
+            - 指定一個交易日期，格式:yyyy 4碼
             
         :param colist: list, default None
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
@@ -672,6 +697,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
         '''
         try:
@@ -691,6 +717,7 @@ class OwlData(_DataID):
     # 除權除息 個股 (Exemption Dividend Policy Single)
     def edps(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
         '''
+        依據指定年度區間，撈取指定股票的股東會日期及停止過戶的相關日期
         
         Parameters
         ----------
@@ -698,10 +725,10 @@ class OwlData(_DataID):
             - 台股股票代號
             
         :param bpd: str
-        - 指定一個交易起始日，格式:yyyymmdd 8碼
+        - 指定一個交易起始日，格式:yyyy 4碼
             
         :param epd: str
-            - 指定一個交易結束日，格式:yyyymmdd 8碼
+            - 指定一個交易結束日，格式:yyyy 4碼
             
         :param colist: list, default None
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
@@ -712,6 +739,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
         '''
         try:
@@ -730,6 +758,7 @@ class OwlData(_DataID):
     # 除權除息 多股 (Exemption Dividend Policy Multi)    
     def edpm(self, dt:str, colist = None) -> 'DataFrame':
         '''
+        依指定日期，撈取全上市櫃台股的股東會日期及停止過戶的相關日期
         
         Parameters
         ----------
@@ -745,6 +774,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
         '''
         try:
@@ -764,6 +794,7 @@ class OwlData(_DataID):
     # 即時報價 (Timely Stock Price)
     def tsp(self, sid:str, colist = None) -> 'DataFrame':
         '''
+        撈取指定股票即時股價資訊
         
         Parameters
         ----------
@@ -779,6 +810,7 @@ class OwlData(_DataID):
         
         [Notes]
         ----------
+        - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
         '''
         try:
