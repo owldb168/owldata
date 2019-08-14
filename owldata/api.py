@@ -24,7 +24,7 @@ from . import _owltime
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 # setting dir 位置
-class _Check_dir():
+class __Check_dir():
     def __init__(self):
         '''
         Auto create directory
@@ -221,7 +221,7 @@ class OwlData(_DataID):
             return 'error'
 
     # 修正資料
-    def check(self, result:'DataFrame', num_col = 2, colists = None, pd_id = None) -> 'DataFrame':
+    def _check(self, result:'DataFrame', num_col = 2, colists = None, pd_id = None) -> 'DataFrame':
         '''
         商品檢查點
         Parameters
@@ -300,7 +300,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -329,7 +329,7 @@ class OwlData(_DataID):
             pdid = self._get_pdid("msp")
             get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
             result = self._data_from_owl(get_data_url)
-            temp = self.check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -383,7 +383,7 @@ class OwlData(_DataID):
             if (dt != 'error'):
                 # 獲取資料
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -438,7 +438,7 @@ class OwlData(_DataID):
             if (dt != 'error'):
                 # 獲取資料
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -477,7 +477,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 1, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 1, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -509,7 +509,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -548,7 +548,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 1, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 1, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -580,7 +580,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -609,7 +609,7 @@ class OwlData(_DataID):
             get_data_url = self._token['data_url']  + pdid
             
             result = self._data_from_owl(get_data_url)
-            temp = self.check(result = result, num_col = -1, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, num_col = -1, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -648,7 +648,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -680,7 +680,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
                 return temp
             else:
                 print("YearError:", OwlError._dicts["YearError"])
@@ -721,7 +721,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -753,7 +753,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
                 result = self._data_from_owl(get_data_url)
-                temp = self.check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
                 return temp
             else:
                 print("YearError:", OwlError._dicts["YearError"])
@@ -786,7 +786,7 @@ class OwlData(_DataID):
             # 獲取資料
             get_data_url = self._token['data_url'] + pdid + "/" + sid
             result = self._data_from_owl(get_data_url)
-            temp = self.check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
