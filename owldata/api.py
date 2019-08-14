@@ -388,7 +388,7 @@ class OwlData(_DataID):
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
-    # 多股資產負債表歷史資料 (Financial Statements Multi)
+    # 多股財務簡表 (Financial Statements Multi)
     def fim(self, di:str, dt:str, colist = None) -> 'DataFrame':
         '''
         
