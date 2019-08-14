@@ -1,12 +1,9 @@
 # Windows:
-
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-
 # Python:
-
 *.py[cod]
 *.so
 *.egg
@@ -15,10 +12,8 @@ dist
 build
 
 # vscode
-
 owldata/.vscode
 
 # python
-
 Python.md
 test.py
