@@ -217,7 +217,7 @@ class OwlData(_DataID):
                 print('錯誤代碼: {} '.format(str(self._token_result.status_code)),OwlError._http_error[self._token_result.status_code])
                 return 'error'
         except:
-            print('SidError:', OwlError._dicts['SidError'])
+            #print('SidError:', OwlError._dicts['SidError'])
             return 'error'
 
     # 修正資料
