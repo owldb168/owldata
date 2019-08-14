@@ -249,7 +249,8 @@ class OwlData(_DataID):
             
             if result is not 'error':
                 # 數值化
-                result.iloc[:,num_col:] = result.iloc[:,num_col:].apply(pd.to_numeric)
+                if num_col != None:
+                    result.iloc[:,num_col:] = result.iloc[:,num_col:].apply(pd.to_numeric)
                 
                 if colists != None:
                     result = result[colists]
@@ -580,7 +581,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -721,7 +722,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = None, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
@@ -753,7 +754,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, num_col = None, colists = colist, pd_id = pdid)
                 return temp
             else:
                 print("YearError:", OwlError._dicts["YearError"])
