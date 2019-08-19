@@ -90,15 +90,51 @@ class _DataID():
     # 商品時間頻率對照表
     def _date_freq(self, start:str, end:str, freq = 'd'):
         
+        if int(start) > int(end):
+            print('DateError:',OwlError._dicts['DateError'])
+            return 'error'
+            
         if freq.lower() not in self._table.keys():
             self._table[freq.lower()] = self._date_table(freq.lower())
         
         if freq.lower() == 'y':
+            try:
+                dt = pd.to_datetime(start, format = '%Y')
+                dt = pd.to_datetime(end, format = '%Y')               
+            except ValueError:
+                print('ValueError:', OwlError._dicts["ValueError"])
+                return 'error'
+            
             if len(start) != 4 or len(end) != 4:
                 print('YearError:',OwlError._dicts['YearError'])
                 return 'error'
+            
+        elif freq.lower() == 'm':
+            try:
+                dt = pd.to_datetime(start, format = '%Y%m')
+                dt = pd.to_datetime(end, format = '%Y%m')               
+            except ValueError:
+                print('ValueError:', OwlError._dicts["ValueError"])
+                return 'error'
+            
+            if len(start) != 6 or len(end) != 6:
+                print('MonthError:',OwlError._dicts['MonthError'])
+                return 'error'
+         
+        elif freq.lower() == 'q':
+            if len(start) != 6 or len(end) != 6:
+                print('SeasonError:',OwlError._dicts['SeasonError'])
+                return 'error'
         
-        if freq.lower() == 'd':
+        elif freq.lower() == 'd':  
+            try:
+                dt = pd.to_datetime(start)
+                dt = pd.to_datetime(end)
+                
+            except ValueError:
+                print('ValueError:', OwlError._dicts["ValueError"])
+                return 'error'
+            
             if len(start) != 8 or len(end) != 8:
                 print('DayError:',OwlError._dicts['DayError'])
                 return 'error'
@@ -216,6 +252,7 @@ class OwlData(_DataID):
             elif(data_result.status_code in OwlError._http_error.keys()):
                 print('錯誤代碼: {} '.format(str(self._token_result.status_code)),OwlError._http_error[self._token_result.status_code])
                 return 'error'
+
         except:
             #print('SidError:', OwlError._dicts['SidError'])
             return 'error'
@@ -254,6 +291,11 @@ class OwlData(_DataID):
                 
                 if colists != None:
                     result = result[colists]
+                    
+                elif colists == []:
+                    print('ColumnsError: 請輸入欄位')
+                    return None
+                
                 return result
                             
         except ValueError:
@@ -301,6 +343,7 @@ class OwlData(_DataID):
                 result = self._data_from_owl(get_data_url)
                 temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
                 return temp
+
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
             
