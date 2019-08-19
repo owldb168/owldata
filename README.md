@@ -1,12 +1,16 @@
-數據貓頭鷹官方網站: https://owl.cmoney.com.tw/Owl/
+![](https://owl.cmoney.com.tw/Owl/resources/images/logo.png)
 
-# owldata 數據貓頭鷹 API
+---
+
+# OwlData 數據貓頭鷹 API
+
+數據貓頭鷹官方網站: https://owl.cmoney.com.tw/Owl/
 
 --------
 
 ## Outline
 
-- [owldata 數據貓頭鷹 API](#owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api)
+- [OwlData 數據貓頭鷹 API](#owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api)
   - [Outline](#outline)
   - [Dependencies](#dependencies)
   - [Install](#install)
@@ -48,11 +52,13 @@ python setup.py install
 
 ### Flow Control
 
-<!-- ![情境流程示意](https://owl.cmoney.com.tw/Owl/resources/images/img_api_01.png) -->
+![情境流程示意](https://owl.cmoney.com.tw/Owl/resources/images/img_api_01.png)
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 ### Code Example
+
+使用 OwlData 模組輸入 AppID 與應用程式密鑰進行登入，並呼叫欲查詢資料表
 
 ``` python
 import owldata
@@ -82,17 +88,20 @@ appsecret = '請輸入 應用程式密鑰'
 owlapp = owldata.OwlData(appid, appsecret)
 
 # 擷取台積電股價 from 2019/08/12 to 2019/08/13
-stock_price = owlapp.ssp("2330", "20190801", "20190830")
+stock_price = owlapp.ssp("2330", "20190812", "20190813")
 stock_price.head()
 ```
 
 ## Data Function
 
-OwlData 使用方法
+OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並可以利用參數 colist 進行欄位篩選
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 1. 個股日收盤行情 (Single Stock Price, SSP)
+
+    <br>依指定日期區間，撈取指定股票代號的股價資訊
+    <br>
 
    ``` python
    OwlData.ssp(sid:str, bpd:str, epd:str, colist:list) -> DataFrame
@@ -179,6 +188,9 @@ OwlData 使用方法
 
 2. 多股每日收盤行情 (Multi-Stock Price, MSP)
 
+    <br>依指定日期，撈取全上市櫃台股的股價資訊
+    <br>
+
     ``` python
     OwlData.msp(dt:str, colist:list) -> DataFrame
     ```
@@ -253,6 +265,9 @@ OwlData 使用方法
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 3. 個股財務簡表 (Financial Statements Single, FIS)
+
+    <br>依據 di 決定查詢資料頻率，並依股票代號，撈取指定區間的財務報表資訊 y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
+    <br>
 
     ```python
     OwlData.fis(di:str, sid:str, bpd:str, epd:str, colist:list) -> DataFrame
@@ -354,7 +369,7 @@ OwlData 使用方法
             <td>自由現金流量(千)</td>
         </tr>
         <tr>
-        <td colspan="25">月財報欄位</td>
+        <td colspan="25">月營收欄位</td>
         </tr>
         <tr>
             <td>年月</td>
@@ -385,6 +400,9 @@ OwlData 使用方法
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 4. 多股財務簡表 (Financial Statements Multi, FIM)
+
+    <br>依據 di 決定查詢資料頻率，並依指定區間，撈取全上市櫃台股的財務報表資訊 y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
+    <br>
 
     ``` python
     OwlData.fim(di:str, dt:str, colist:list) -> DataFrame
@@ -476,7 +494,7 @@ OwlData 使用方法
             <td>自由現金流量(千)</td>
         </tr>
         <tr>
-        <td colspan="25">月財報欄位</td>
+        <td colspan="25">月營收欄位</td>
         </tr>
         <tr>
             <td>股票代號</td>
@@ -493,6 +511,7 @@ OwlData 使用方法
     </table>
 
    - 範例
+
         ``` python
         # 台股上市上櫃財務簡表 from 2018
         >>> colist = ['股票代號', '股票名稱', '年度', '流動資產', '非流動資產', '資產總計', '流動負債', '非流動負債', '負債總計', '權益總計', '自由現金流量(千)']
@@ -507,7 +526,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-5. 法人籌碼個股資料 (Corporate Chip Single)
+5. 法人籌碼個股資料 (Corporate Chip Single, CHS)
+
+    <br>依指定日期區間，撈取指定股票的三大法人買賣狀況和該股票的融資券狀況
+    <br>
 
    ``` python
    OwlData.chs(sid:str, bpd:str, epd:str, colist:list) -> DataFrame
@@ -595,7 +617,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-6. 法人籌碼多股資料 (Corporate Chip Multi)
+6. 法人籌碼多股資料 (Corporate Chip Multi, CHM)
+
+    <br>查詢指定日期，全上市櫃台股的三大法人買賣狀況和融資券狀況
+    <br>
 
    ```python
    OwlData.chm(dt:str,colist:list) -> DataFrame
@@ -674,7 +699,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-7. 技術指標 個股 (Technical Indicators Single)
+7. 技術指標 個股 (Technical Indicators Single, TIS)
+
+    <br>依指定日期區間，撈取指定股票的技術指標數值
+    <br>
 
     ```python
     OwlData.tis(sid:str, bpd:str, epd:str, colist:list) -> DataFrame
@@ -759,7 +787,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-8. 技術指標 多股 (Technical Indicators Multi)
+8. 技術指標 多股 (Technical Indicators Multi, TIM)
+
+    <br>查詢指定日期，全上市櫃台股的技術指標數值
+    <br>
 
     ```python
     OwlData.tim(dt:str, colist:list) -> DataFrame
@@ -834,7 +865,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-9. 公司基本資料 多股 (Company Information Multi)
+9. 公司基本資料 多股 (Company Information Multi, CIM)
+
+    <br>撈取上市櫃台股的公司基本資料
+    <br>
 
     ``` python
     OwlData.cim(colist:list) -> DataFrame
@@ -912,7 +946,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-10. 股利政策 個股 (Dividend Policy Single)
+10. 股利政策 個股 (Dividend Policy Single, DPS)
+
+    <br>依據指定年度區間，撈取指定股票的配發股利狀況表
+    <br>
 
     ``` python
     OwlData.dps(sid:str, bpd:str, epd:str, colist:list) -> DataFrame
@@ -929,13 +966,13 @@ OwlData 使用方法
         <tr>
             <td> - <b>  bpd </b> : <i> string </i>
             <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;查詢起始日期 8 碼數字，格式: yyyymmdd
+                &nbsp;&nbsp;&nbsp;&nbsp;查詢起始年度 4 碼數字，格式: yyyy
             </td>
         </tr>
         <tr>
             <td> - <b> epd</b> : <i> string</i>
             <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;查詢結束日期 8 碼數字，格式: yyyymmdd
+                &nbsp;&nbsp;&nbsp;&nbsp;查詢結束年度 4 碼數字，格式: yyyy
             </td>
         </tr>
         <tr>
@@ -992,7 +1029,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-11. 股利政策 多股 (Dividend Policy Multi)
+11. 股利政策 多股 (Dividend Policy Multi, DPM)
+
+    <br>依指定年度，撈取全上市櫃台股的配發股利狀況表
+    <br>
 
     ``` python
     OwlData.dpm(dt:str, colist:list) -> DataFrame
@@ -1003,7 +1043,7 @@ OwlData 使用方法
             <td rowspan="2"><b>Parameters<b></td>
             <td> - <b> dt </b> : <i> string </i>
             <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;查詢某一日期 8碼，格式: yyyymmdd
+                &nbsp;&nbsp;&nbsp;&nbsp;查詢某一年度 4碼，格式: yyyy
             </td>
         </tr>
         <tr>
@@ -1064,6 +1104,9 @@ OwlData 使用方法
 
 12. 除權除息 個股 (Exemption Dividend Policy Single, EDPS)
 
+    <br>依據指定年度區間，撈取指定股票的股東會日期及停止過戶的相關日期
+    <br>
+
     ``` python
     OwlData.edps(sid:str, bpd:str, epd:str, colist:list) -> DataFrame
     ```
@@ -1079,13 +1122,13 @@ OwlData 使用方法
         <tr>
             <td> - <b>  bpd </b> : <i> string </i>
             <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;查詢起始日期 8 碼數字，格式: yyyymmdd
+                &nbsp;&nbsp;&nbsp;&nbsp;查詢起始年度 4 碼數字，格式: yyyy
             </td>
         </tr>
         <tr>
             <td> - <b> epd</b> : <i> string</i>
             <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;查詢結束日期 8 碼數字，格式: yyyymmdd
+                &nbsp;&nbsp;&nbsp;&nbsp;查詢結束年度 4 碼數字，格式: yyyy
             </td>
         </tr>
         <tr>
@@ -1145,7 +1188,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-13. 除權除息 多股 (Exemption Dividend Policy Multi)
+13. 除權除息 多股 (Exemption Dividend Policy Multi, EDPM)
+
+    <br>依指定日期，撈取全上市櫃台股的股東會日期及停止過戶的相關日期
+    <br>
 
     ``` python
     OwlData.edpm(dt:str, colist:str) -> DataFrame
@@ -1156,7 +1202,7 @@ OwlData 使用方法
             <td rowspan="2"><b>Parameters<b></td>
             <td> - <b> dt </b> : <i> string </i>
             <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;查詢某一日期 8碼，格式: yyyymmdd
+                &nbsp;&nbsp;&nbsp;&nbsp;查詢某一年度 4 碼，格式: yyyy
             </td>
         </tr>
         <tr>
@@ -1220,8 +1266,10 @@ OwlData 使用方法
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
-14. 即時報價 (Timely Stock Price)
+14. 即時報價 (Timely Stock Price, TSP)
 
+    <br>撈取指定股票即時股價資訊
+    <br>
     ``` python
     OwlData.tsp(sid:str, colist:str) -> DataFrame
     ```
@@ -1235,7 +1283,7 @@ OwlData 使用方法
             </td>
         </tr>
         <tr>
-            <td> - <b> colist </b>: 
+            <td> - <b> colist </b>:
             <i> list, default None</i>
             <br>
                 &nbsp;&nbsp;&nbsp;&nbsp;指定顯示欄位 (若不輸入則顯示所有欄位)
