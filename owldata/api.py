@@ -349,10 +349,10 @@ class OwlData(_DataID):
             - 台股股票代號
             
         :param bpd: str
-            - 指定一個交易起始日，格式:yyyymmdd 8碼
+            - 指定一個交易起始日，格式:yyyy 4碼
             
         :param epd: str
-            - 指定一個交易結束日，格式:yyyymmdd 8碼
+            - 指定一個交易結束日，格式:yyyy 4碼
             
         :param colist: list
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
