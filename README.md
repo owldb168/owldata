@@ -266,8 +266,8 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
 
 3. 個股財務簡表 (Financial Statements Single, FIS)
 
-    <br>依據 di 決定查詢資料頻率，並依股票代號，撈取指定區間的財務報表資訊 y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
-    <br>
+    <br>依據 di 決定查詢資料頻率，並依股票代號，撈取指定區間的財務報表資訊
+    <br>y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
 
     ```python
     OwlData.fis(di:str, sid:str, bpd:str, epd:str, colist:list) -> DataFrame
@@ -401,8 +401,8 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
 
 4. 多股財務簡表 (Financial Statements Multi, FIM)
 
-    <br>依據 di 決定查詢資料頻率，並依指定區間，撈取全上市櫃台股的財務報表資訊 y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
-    <br>
+    <br>依據 di 決定查詢資料頻率，並依指定區間，撈取全上市櫃台股的財務報表資訊
+    <br> y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
 
     ``` python
     OwlData.fim(di:str, dt:str, colist:list) -> DataFrame

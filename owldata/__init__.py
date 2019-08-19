@@ -8,6 +8,7 @@
 # =====================================================================
 
 from .api import OwlData
+from .__version__ import __version__
 
 __docformat__ = 'restructuredtext'
 __doc__ = '''

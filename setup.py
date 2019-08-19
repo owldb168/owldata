@@ -1,11 +1,16 @@
 from setuptools import setup
 
-with open('requirements.txt') as fid:
-    requires = [line.strip() for line in fid]
+# with open('requirements.txt') as fid:
+#     requires = [line.strip() for line in fid]
+
+requires = [
+    'pandas',
+    'request'
+    ]
 
 setup(
     name = 'owldata',
-    version = '0.0.1',
+    version = "0.0.1",
     description = 'Testing version for owl',
     author = 'Owl Corp.',
     author_email = 'owldb@cmoney.com.tw',
