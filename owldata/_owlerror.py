@@ -7,6 +7,7 @@
 
 # =====================================================================
 import pandas as pd
+from functools import wraps 
 
 # --------------------
 # BLOCK 除錯
@@ -15,6 +16,7 @@ class OwlError():
     _dicts = {
                 'YearError':'日期格式錯誤，請重新輸入。格式:yyyy',
                 'SeasonError':'日期格式錯誤，請重新輸入。格式:yyyyqq',
+                'SeasonError2':'日期格式錯誤，季別應在 01 至 04 之間',
                 'MonthError':'日期格式錯誤，請重新輸入。格式:yyyymm',
                 'DayError':'日期格式錯誤，請重新輸入。格式:yyyymmdd',
                 'DateError':'資料日期輸入錯誤，請確認：起日期<迄日期',
@@ -51,4 +53,97 @@ class OwlError():
     @classmethod
     def http(cls):
         return pd.Series(cls._http_error)
+    
+    def _check_dt(di = 'd'):
+        def inner_function(func):
+            @wraps(func)
+            def wrap(self, dt, colist, *args):
+                season = ['0' + str(x) for x in range(5,13)]
+                
+                if di.lower() == 'y':
+                    if len(dt) != 4:
+                        print('YearError:',OwlError._dicts['YearError'])
+                        return None
+                    try:
+                        dts = pd.to_datetime(dt, format = '%Y')             
+                    except ValueError:
+                        print('ValueError:', OwlError._dicts["ValueError"])
+                        return None
+                    
+                elif di.lower() == 'm':
+                    if len(dt) != 6:
+                        print('MonthError:',OwlError._dicts['MonthError'])
+                        return None
+                    try:
+                        dts = pd.to_datetime(dt, format = '%Y%m')              
+                    except ValueError:
+                        print('ValueError:', OwlError._dicts["ValueError"])
+                        return None
+                    
+                elif di.lower() == 'q':
+                    if len(dt) != 6:
+                        print('SeasonError:',OwlError._dicts['SeasonError'])
+                        return None
+                    if dt[4:6] in season:
+                        print('SeasonError2:',OwlError._dicts['SeasonError2'])
+                        return None
+                    
+                elif di.lower() == 'd':  
+                    if len(dt) != 8:
+                        print('DayError:',OwlError._dicts['DayError'])
+                        return None
+                    
+                    try:
+                        dts = pd.to_datetime(dt)
+                    except ValueError:
+                        print('ValueError:', OwlError._dicts["ValueError"])
+                        return None
+                return func(self, dt, colist, *args)
+            return wrap
+        return inner_function
+    
+    def _check_di(func):
+        @wraps(func)
+        def wrap(self, di, dt, colist,*args):
+            
+            season = ['0' + str(x) for x in range(5,13)]
+            
+            if di.lower() == 'y':
+                if len(dt) != 4:
+                    print('YearError:',OwlError._dicts['YearError'])
+                    return None
+                try:
+                    dts = pd.to_datetime(dt, format = '%Y')             
+                except ValueError:
+                    print('ValueError:', OwlError._dicts["ValueError"])
+                    return None
+   
+            elif di.lower() == 'm':
+                if len(dt) != 6:
+                    print('MonthError:',OwlError._dicts['MonthError'])
+                    return None
+                try:
+                    dts = pd.to_datetime(dt, format = '%Y%m')              
+                except ValueError:
+                    print('ValueError:', OwlError._dicts["ValueError"])
+                    return None
 
+            elif di.lower() == 'q':
+                if len(dt) != 6:
+                    print('SeasonError:',OwlError._dicts['SeasonError'])
+                    return None
+                if dt[4:6] in season:
+                    print('SeasonError2:',OwlError._dicts['SeasonError2'])
+                    return None
+                
+            elif di.lower() == 'd':  
+                if len(dt) != 8:
+                    print('DayError:',OwlError._dicts['DayError'])
+                    return None 
+                try:
+                    dts = pd.to_datetime(dt)
+                except ValueError:
+                    print('ValueError:', OwlError._dicts["ValueError"])
+                    return None
+            return func(self, di, dt, colist, *args)
+        return wrap
