@@ -10,7 +10,7 @@ requires = [
 
 setup(
     name = 'owldata',
-    version = "0.0.1",
+    version = "0.0.11",
     description = 'Testing version for owl',
     author = 'Owl Corp.',
     author_email = 'owldb@cmoney.com.tw',
