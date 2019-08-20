@@ -57,7 +57,7 @@ class OwlError():
     def _check_dt(di = 'd'):
         def inner_function(func):
             @wraps(func)
-            def wrap(self, dt, colist, *args):
+            def wrap(self, dt, colist = None):
                 season = ['0' + str(x) for x in range(5,13)]
                 
                 if di.lower() == 'y':
@@ -98,13 +98,13 @@ class OwlError():
                     except ValueError:
                         print('ValueError:', OwlError._dicts["ValueError"])
                         return None
-                return func(self, dt, colist, *args)
+                return func(self, dt, colist)
             return wrap
         return inner_function
     
     def _check_di(func):
         @wraps(func)
-        def wrap(self, di, dt, colist,*args):
+        def wrap(self, di, dt, colist = None):
             
             season = ['0' + str(x) for x in range(5,13)]
             
@@ -145,5 +145,5 @@ class OwlError():
                 except ValueError:
                     print('ValueError:', OwlError._dicts["ValueError"])
                     return None
-            return func(self, di, dt, colist, *args)
+            return func(self, di, dt, colist)
         return wrap

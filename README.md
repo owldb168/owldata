@@ -96,8 +96,6 @@ stock_price.head()
 
 OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並可以利用參數 colist 進行欄位篩選
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
-
 1. 個股日收盤行情 (Single Stock Price, SSP)
 
     <br>依指定日期區間，撈取指定股票代號的股價資訊
@@ -184,7 +182,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     1    20190812  台積電	254.50	254.50	251.00	251.00	-2.50	-0.99	24732.00
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 2. 多股每日收盤行情 (Multi-Stock Price, MSP)
 
@@ -249,7 +247,6 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
         </tr>
     </table>
 
-    
      - 範例
 
     ``` python
@@ -262,7 +259,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     1     1102    亞泥   20190801   41.45  41.70   41.20   41.40  -0.40  -0.96   8384.00   4275.00   347479.00   2.00  41.44  8384463.00
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 3. 個股財務簡表 (Financial Statements Single, FIS)
 
@@ -397,7 +394,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
 
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 4. 多股財務簡表 (Financial Statements Multi, FIM)
 
@@ -524,7 +521,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
 
         ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 5. 法人籌碼個股資料 (Corporate Chip Single, CHS)
 
@@ -615,7 +612,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
         1	20190801	-9058.00	-2323101.00	    -10675.00	    -2737829.00	        196.00	    50270.00	        1421.00	        364458.00	        806.00	    10212.00	0.16	    -226.00	1765.00	    0.03	17.28	0.00
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 6. 法人籌碼多股資料 (Corporate Chip Multi, CHM)
 
@@ -697,7 +694,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     1     1102	亞泥	 1697.00      70341.00           1636.00	  67813.00	  0.00	            0.00
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 7. 技術指標 個股 (Technical Indicators Single, TIS)
 
@@ -785,7 +782,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     1      20190801    39.80    60.45     30.51       51.65
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 8. 技術指標 多股 (Technical Indicators Multi, TIM)
 
@@ -863,7 +860,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     1	1102	亞泥  20190801	9.02	13.11	15.33	 27.81
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 9. 公司基本資料 多股 (Company Information Multi, CIM)
 
@@ -944,7 +941,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     2	1103	  嘉泥	    嘉泥       張剛綸	祁士鉅
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 10. 股利政策 個股 (Dividend Policy Single, DPS)
 
@@ -1027,7 +1024,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     1   2017	8	    0.00	8.00
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 11. 股利政策 多股 (Dividend Policy Multi, DPM)
 
@@ -1100,7 +1097,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     2	1103	 嘉泥	2018	    1.00	    0.00	    1.00
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 12. 除權除息 個股 (Exemption Dividend Policy Single, EDPS)
 
@@ -1186,7 +1183,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     1	2017	20170608	20170329.00	20170329.00
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 13. 除權除息 多股 (Exemption Dividend Policy Multi, EDPM)
 
@@ -1264,12 +1261,13 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     4	1108	幸福	2018	20180615	20180409
     ```
 
-<div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+    <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
 
 14. 即時報價 (Timely Stock Price, TSP)
 
     <br>撈取指定股票即時股價資訊
     <br>
+
     ``` python
     OwlData.tsp(sid:str, colist:str) -> DataFrame
     ```
