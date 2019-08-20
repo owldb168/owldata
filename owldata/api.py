@@ -122,11 +122,11 @@ class _DataID():
             if len(start) != 6 or len(end) != 6:
                 print('SeasonError:',OwlError._dicts['SeasonError'])
                 return 'error'
-            
+
             if start[4:6] in season or end[4:6] in season:
                 print('SeasonError2:',OwlError._dicts['SeasonError2'])
                 return 'error'
-        
+
         elif freq.lower() == 'd':  
             if len(start) != 8 or len(end) != 8:
                 print('DayError:',OwlError._dicts['DayError'])
@@ -459,7 +459,7 @@ class OwlData(_DataID):
                 - y : yyyy, 4 碼
                 - q : yyyyqq, 6 碼, qq 範圍為 01 - 04, 表示為第一季至第四季
                 - m : yyyymm, 6 碼
-            
+
         :param colist: list, default None
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
             - y and q : ['年度', '流動資產', '非流動資產', '資產總計', '流動負債', '非流動負債', '負債總計', '權益總計', '公告每股淨值', '營業收入(千)', '營業成本(千)', '營業毛利(千)', '營業費用(千)', '營業利益(千)', '營業外收入及支出(千)', '稅前純益(千)', '所得稅(千)', '稅後純益歸屬(千)', '每股盈餘(元)', '營業活動現金流量(千)', '投資活動現金流量(千)', '籌資活動現金流量(千)', '本期現金及約當現金增減數(千)', '期末現金及約當現金餘額(千)', '自由現金流量(千)']
