@@ -85,6 +85,8 @@ class _DataID():
     # 商品時間
     def _date_table(self, freq:str):
         get_data_url = self._token['data_url'] + self._table_code[freq.lower()]
+        if freq.lower() == 'd':
+            get_data_url = get_data_url + '/TWA00/999'
         return self._data_from_owl(get_data_url)
     
     # 商品時間頻率對照表
