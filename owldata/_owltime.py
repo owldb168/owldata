@@ -8,80 +8,122 @@
 # =====================================================================
 
 import datetime
+import pandas as pd
 from ._owlerror import OwlError
 
-def _count_dates(begin, end, trans = 'm'):
-    '''
-    輸入起訖日期，依據字元數區分年季日格式，計算出區間長度
-    parameters
-    ------------
-    :parame begin: str
-        輸入八碼 查詢日資料的區間長度；輸入六碼 查詢季或月資料的區間長度；輸入四碼 查詢年資料的區間長度
-    
-    :parame end: str
-        輸入八碼 查詢日資料的區間長度；輸入六碼 查詢季或月資料的區間長度；輸入四碼 查詢年資料的區間長度
-    :parame trans: str
-        - 輸入季別與月份轉換, m = 月份 ; s = 季別
-    Returns
-    ---------
-    :str: 輸出一個期數
-    
-    Examples
-    ---------
-    日資料: count_dates("20180101","20180131")
-        Out: 31
-    季資料: count_dates("201702","201901")
-        Out: 8
-    年資料: count_dates("2017","2019")
-        Out: 3
-    
-    [Notes]
-    -------
-    計算期數時，+1是為了加上期初的第一筆
-    起始日<結束日: 會出現錯誤訊息，並以 _dicts 回傳文字訊息
-    日資料的日期大於該月最後一日: 會出錯誤訊息，並以 _dicts 回傳文字訊息
-    '''
-    # 轉換日期長度
-    if len(begin)==8 and len(end)==8:
-        diff=datetime.datetime.strptime(end, "%Y%m%d") - datetime.datetime.strptime(begin, "%Y%m%d")
-        if (diff.days>=0):
-            return str(diff.days+1)
-        else:
-            print(OwlError._dicts["DateError"])
-            return "err"
-    # 轉換月期長度
+# --------------------
+# BLOCK 商品資訊與時間表
+# --------------------
+# 取得函數與商品對應表
+class _DataID():
+    def __init__(self):
+        # 商品表
+        # self._fp = ''
         
-    elif (len(begin)==6 and len(end)==6 and trans == 'm'):
-        year_begin=datetime.datetime.strptime(begin,"%Y%m").year
-        month_begin=datetime.datetime.strptime(begin,"%Y%m").month
-        year_end=datetime.datetime.strptime(end,"%Y%m").year
-        month_end=datetime.datetime.strptime(end,"%Y%m").month
-        diff=(year_end-year_begin)*12+(month_end-month_begin)
-        if (diff>=0):
-            return str(diff+1)
-        else:
-            print(OwlError._dicts["DateError"])
-            return "err"    
+        # 商品時間對照表
+        self._table_code = {
+            'd':'PYCtrl-14806a/',
+            'm':'PYCtrl-14809a/',
+            'q':'PYCtrl-14810a/',
+            'y':'PYCtrl-14811a/'
+            }
+        
+        # 商品時間表
+        self._table = {}
 
+    # 取得函數與商品對應表
+    def _pdid_map(self):
+        '''
+        擷取商品函數與商品ID表
+        Returns
+        ----------
+        :DataFrame:
+            FuncID          pdid
+            ssp 	PYPRI-14776a
+            msp 	PYPRI-14777b
+            sby		PYBAL-14782a
+            sbq		PYBAL-14780a
         
-    # 轉換季度長度
-    elif (len(begin)==6 and len(end)==6) and int(begin[4:6])<=4 and int(end[4:6])<=4 and trans == 's':
-        year_begin=datetime.datetime.strptime(begin,"%Y%m").year
-        month_begin=datetime.datetime.strptime(begin,"%Y%m").month
-        year_end=datetime.datetime.strptime(end,"%Y%m").year
-        month_end=datetime.datetime.strptime(end,"%Y%m").month
-        diff=(year_end-year_begin)*4+(month_end-month_begin)
-        if (diff>=0):
-            return str(diff+1)
-        else:
-            print(OwlError._dicts["DateError"])
-            return "err"
+        [Notes]
+        ----------
+        FuncID: ssp-個股股價, msp-多股股價, sby-年度資產負債表(個股), sbq-季度資產負債表(個股)
+        pdid: 商品對應的ID
+        '''
+        get_data_url = self._token['data_url'] + self._token['ctrlmap']
+        self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
+        return self._fp
+    
+    # 取得函數對應商品
+    def _get_pdid(self, funcname:str):
+        return self._fp.loc[funcname][0]
+    
+    # 商品時間
+    def _date_table(self, freq:str):
+        get_data_url = self._token['data_url'] + self._table_code[freq.lower()]
+        if freq.lower() == 'd':
+            get_data_url = get_data_url + '/TWA00/999'
+        return self._data_from_owl(get_data_url)
+    
+    # 商品時間頻率對照表
+    def _date_freq(self, start:str, end:str, freq = 'd'):
+        season = ['0' + str(x) for x in range(5,13)]
+
+        if freq.lower() not in self._table.keys():
+            self._table[freq.lower()] = self._date_table(freq.lower())
         
-    # 轉換年度的長度
-    elif len(begin)==4 and len(end)==4:
-        diff=int(end)-int(begin)
-        if (diff>=0):
-            return str(diff+1)
-        else:
-            print(OwlError._dicts["DateError"])
-            return "err"
+        if freq.lower() == 'y':
+            if len(start) != 4 or len(end) != 4:
+                print('YearError:',OwlError._dicts['YearError'])
+                return 'error'
+            try:
+                dt = pd.to_datetime(start, format = '%Y')
+                dt = pd.to_datetime(end, format = '%Y')
+
+            except ValueError:
+                print('ValueError:', OwlError._dicts["ValueError"])
+                return 'error'
+
+        elif freq.lower() == 'm':
+            if len(start) != 6 or len(end) != 6:
+                print('MonthError:',OwlError._dicts['MonthError'])
+                return 'error'
+            try:
+                dt = pd.to_datetime(start, format = '%Y%m')
+                dt = pd.to_datetime(end, format = '%Y%m')
+                         
+            except ValueError:
+                print('ValueError:', OwlError._dicts["ValueError"])
+                return 'error'
+
+        elif freq.lower() == 'q':
+            if len(start) != 6 or len(end) != 6:
+                print('SeasonError:',OwlError._dicts['SeasonError'])
+                return 'error'
+
+            if start[4:6] in season or end[4:6] in season:
+                print('SeasonError2:',OwlError._dicts['SeasonError2'])
+                return 'error'
+
+        elif freq.lower() == 'd':
+            if len(start) != 8 or len(end) != 8:
+                print('DayError:',OwlError._dicts['DayError'])
+                return 'error'
+            
+            try:
+                dt = pd.to_datetime(start)
+                dt = pd.to_datetime(end)
+                
+            except ValueError:
+                print('ValueError:', OwlError._dicts["ValueError"])
+                return 'error'
+            
+        if int(start) > int(end):
+            print('DateError:',OwlError._dicts['DateError'])
+            return 'error'
+        
+        temp = self._table[freq.lower()].copy()
+        temp = temp[temp[temp.columns[0]].between(start, end)]
+        if len(temp) == 0:
+            print('CannotFind:', OwlError._dicts["CannotFind"])
+            return 'error'
+        return str(len(temp))

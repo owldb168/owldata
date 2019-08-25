@@ -14,12 +14,11 @@ import datetime
 import os
 
 from ._owlerror import OwlError
-from . import _owltime
+from ._owltime import _DataID
 
 # --------------------
 # BLOCK 起始設置
 # --------------------
-
 # 設定 Pandas DataFrame 顯示數字小數點兩位
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
@@ -37,125 +36,10 @@ class __Check_dir():
                 os.makedirs(dirs)
 
 # --------------------
-# BLOCK 商品資訊
-# --------------------
-# 取得函數與商品對應表
-class _DataID():
-    def __init__(self):
-        # 商品表
-        # self._fp = ''
-        
-        # 商品時間對照表
-        self._table_code = {
-            'd':'PYCtrl-14806a/',
-            'm':'PYCtrl-14809a/',
-            'q':'PYCtrl-14810a/',
-            'y':'PYCtrl-14811a/'
-            }
-        
-        # 商品時間表
-        self._table = {}
-
-    # 取得函數與商品對應表
-    def _pdid_map(self):
-        '''
-        擷取商品函數與商品ID表
-        Returns
-        ----------
-        :DataFrame:
-            FuncID          pdid
-            ssp 	PYPRI-14776a
-            msp 	PYPRI-14777b
-            sby		PYBAL-14782a
-            sbq		PYBAL-14780a
-        
-        [Notes]
-        ----------
-        FuncID: ssp-個股股價, msp-多股股價, sby-年度資產負債表(個股), sbq-季度資產負債表(個股)
-        pdid: 商品對應的ID
-        '''
-        get_data_url = self._token['data_url'] + self._token['ctrlmap']
-        self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
-        return self._fp
-    
-    # 取得函數對應商品
-    def _get_pdid(self, funcname:str):
-        return self._fp.loc[funcname][0]
-    
-    # 商品時間
-    def _date_table(self, freq:str):
-        get_data_url = self._token['data_url'] + self._table_code[freq.lower()]
-        if freq.lower() == 'd':
-            get_data_url = get_data_url + '/TWA00/999'
-        return self._data_from_owl(get_data_url)
-    
-    # 商品時間頻率對照表
-    def _date_freq(self, start:str, end:str, freq = 'd'):
-        season = ['0' + str(x) for x in range(5,13)]
-        
-        if freq.lower() not in self._table.keys():
-            self._table[freq.lower()] = self._date_table(freq.lower())
-        
-        if freq.lower() == 'y':
-            if len(start) != 4 or len(end) != 4:
-                print('YearError:',OwlError._dicts['YearError'])
-                return 'error'
-            try:
-                dt = pd.to_datetime(start, format = '%Y')
-                dt = pd.to_datetime(end, format = '%Y') 
-                              
-            except ValueError:
-                print('ValueError:', OwlError._dicts["ValueError"])
-                return 'error'
-
-        elif freq.lower() == 'm':
-            if len(start) != 6 or len(end) != 6:
-                print('MonthError:',OwlError._dicts['MonthError'])
-                return 'error'
-            try:
-                dt = pd.to_datetime(start, format = '%Y%m')
-                dt = pd.to_datetime(end, format = '%Y%m')      
-                         
-            except ValueError:
-                print('ValueError:', OwlError._dicts["ValueError"])
-                return 'error'
-
-        elif freq.lower() == 'q':
-            if len(start) != 6 or len(end) != 6:
-                print('SeasonError:',OwlError._dicts['SeasonError'])
-                return 'error'
-
-            if start[4:6] in season or end[4:6] in season:
-                print('SeasonError2:',OwlError._dicts['SeasonError2'])
-                return 'error'
-
-        elif freq.lower() == 'd':  
-            if len(start) != 8 or len(end) != 8:
-                print('DayError:',OwlError._dicts['DayError'])
-                return 'error'
-            
-            try:
-                dt = pd.to_datetime(start)
-                dt = pd.to_datetime(end)
-                
-            except ValueError:
-                print('ValueError:', OwlError._dicts["ValueError"])
-                return 'error'
-            
-        if int(start) > int(end):
-            print('DateError:',OwlError._dicts['DateError'])
-            return 'error'
-        
-        temp = self._table[freq.lower()].copy()
-        temp = temp[temp[temp.columns[0]].between(start, end)]
-        return str(len(temp))
-
-
-# --------------------
 # BLOCK API擷取資料
 # --------------------
 # 核心程式
-class OwlData(_DataID):  
+class OwlData(_DataID):
     def __init__(self, auid:str, ausrt:str):
         '''
         Please insert your personal information
@@ -189,7 +73,7 @@ class OwlData(_DataID):
         return '歡迎使用數據貓頭鷹資料庫, 連線狀態: {}'.format(str(self.status_code))
     
     # Token 取得
-    def _request_token_authorization(self)  -> int:
+    def _request_token_authorization(self) -> int:
         self._token_result = requests.request("POST",self._token['token_url'],
                                         data = self._token['token_params'],
                                         headers = self._token['token_headers'])
@@ -239,16 +123,13 @@ class OwlData(_DataID):
             1    1102        亞泥    20171229   27.80  ...
             2    1103        嘉泥    20171229   12.85  ...
             3    1104        環泥    20171229   22.85  ...
-        
-           
-        [Notes]
+
+        Notes
         -------
         先請求網址回覆200後，才會抓取資料(網址輸入錯誤，才會撈不到資料)
         個股: 假設基準日: 20190701、股票代號: 1101、期數: 20，則會撈取自20190701往前20筆 1101的資料
         多股: 取指定日期當天，各檔的數據資料
         '''
-        
-        
         data_result = requests.request('GET', url, headers = self._data_headers)
         
         try:
@@ -264,13 +145,16 @@ class OwlData(_DataID):
             return 'error'
 
     # 修正資料
-    def _check(self, result:'DataFrame', num_col = 2, colists = None, pd_id = None) -> 'DataFrame':
+    def _check(self, result:'DataFrame', freq=None, num_col=2, colists=None, pd_id=None) -> 'DataFrame':
         '''
         商品檢查點
         Parameters
         ----------
         :param result: DataFrame
             - 輸入原始表格
+            
+        :param freq: str
+            - 表格頻率
             
         :param num_col: int
             - 數值化資料欄位起點
@@ -289,14 +173,38 @@ class OwlData(_DataID):
             if result.empty:
                 print('SidError:',OwlError._dicts["SidError"])
                 return result
-            
+
             if result is not 'error':
+                # 日期修正
+                if freq == 'd':
+                    result['日期'] = pd.to_datetime(result['日期'])
+                    if '股票代號' not in result.columns:
+                        result.sort_values('日期', inplace = True)
+                        result.reset_index(drop = True, inplace = True)
+                elif freq == 'm':
+                    result['年月'] = pd.to_datetime(result['年月'], format = '%Y%m')
+                    if '股票代號' not in result.columns:
+                        result.sort_values('年月', inplace = True)
+                        result.reset_index(drop = True, inplace = True)
+                elif freq == 'q':
+                    result['年季'] = result['年季'].apply(lambda x: x[0:4]+x[4:6].replace('0','Q'))
+                    result['年季'] = pd.to_datetime(result['年季'])
+                    if '股票代號' not in result.columns:
+                        result.sort_values('年季', inplace = True)
+                        result.reset_index(drop = True, inplace = True)
+                elif freq == 'y':
+                    result['年度'] = pd.to_datetime(result['年度']+'1231', format = '%Y%m%d')
+                    if '股票代號' not in result.columns:
+                        result.sort_values('年度', inplace = True)
+                        result.reset_index(drop = True, inplace = True)
+
                 # 數值化
                 if num_col != None:
                     result.iloc[:,num_col:] = result.iloc[:,num_col:].apply(pd.to_numeric)
                 
+                # 欄位選擇
                 if colists != None:
-                    result = result[colists]
+                    result = result[colists].copy()
                     
                 elif colists == []:
                     print('ColumnsError: 請輸入欄位')
@@ -312,7 +220,7 @@ class OwlData(_DataID):
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pd_id)
     
     # 個股日收盤行情 (Single Stock Price)
-    def ssp(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
+    def ssp(self, sid:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
         '''
         依指定日期區間，撈取指定股票代號的股價資訊
         
@@ -333,8 +241,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
@@ -347,7 +255,7 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, freq = 'd', num_col = 2, colists = colist, pd_id = pdid)
                 return temp
 
         except:
@@ -355,7 +263,7 @@ class OwlData(_DataID):
             
     # 多股每日收盤行情 (Multi Stock Price)
     @OwlError._check_dt(di = 'd')
-    def msp(self, dt:str, colist = None) -> 'DataFrame':
+    def msp(self, dt:str, colist=None) -> 'DataFrame':
         '''
         依指定日期，撈取全上市櫃台股的股價資訊
         
@@ -370,22 +278,23 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
+
         '''
         try:
             pdid = self._get_pdid("msp")
             get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
             result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, freq = 'd', num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
 
     # 個股財務簡表 (Financial Statements Single )
-    def fis(self, di:str, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
+    def fis(self, di:str, sid:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
         '''
         依據 di 決定查詢資料頻率，並依股票代號，撈取指定區間的財務報表資訊
         y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
@@ -394,15 +303,18 @@ class OwlData(_DataID):
         ----------
         :param di: str
             - 查詢資料時間頻率，y = 年度, q = 季度, m = 月份
+                - Y : 年度, 格式 : yyyy
+                - Q : 季度, 格式 : yyyyqq
+                - M : 月, 格式 : yyyymm
             
         :param sid: str
             - 台股股票代號
             
         :param bpd: str
-            - 指定一個交易起始日，格式:yyyy 4碼
+            - 指定一個交易起始日
             
         :param epd: str
-            - 指定一個交易結束日，格式:yyyy 4碼
+            - 指定一個交易結束日
             
         :param colist: list
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
@@ -412,8 +324,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 季度日期格式 yyyqq, 其中 qq 請輸入 01 - 04, 分別表示為第一季至第四季 
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
@@ -439,14 +351,14 @@ class OwlData(_DataID):
             if (dt != 'error'):
                 # 獲取資料
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, freq = di.lower(), num_col = 3, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
     # 多股財務簡表 (Financial Statements Multi)
     @OwlError._check_di
-    def fim(self, di:str, dt:str, colist = None) -> 'DataFrame':
+    def fim(self, di:str, dt:str, colist=None) -> 'DataFrame':
         '''
         依據 di 決定查詢資料頻率，並依指定區間，撈取全上市櫃台股的財務報表資訊
         y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊        
@@ -470,8 +382,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 季度日期格式 yyyqq, 其中 qq 請輸入 01 - 04, 分別表示為第一季至第四季 
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
@@ -501,13 +413,13 @@ class OwlData(_DataID):
                 
             # 獲取資料
             result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, freq = di.lower(), num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
         
     # 法人籌碼個股歷史資料 (Corporate Chip Single)
-    def chs(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
+    def chs(self, sid:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
         '''
         依指定日期區間，撈取指定股票的三大法人買賣狀況和該股票的融資券狀況
         
@@ -528,8 +440,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
@@ -542,14 +454,14 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 1, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, freq = 'd', num_col = 1, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
 
     # 法人籌碼多股歷史資料 (Corporate Chip Multi)
     @OwlError._check_dt(di = 'd')
-    def chm(self, dt:str, colist = None) -> 'DataFrame':
+    def chm(self, dt:str, colist=None) -> 'DataFrame':
         '''
         查詢指定日期，全上市櫃台股的三大法人買賣狀況和融資券狀況
         
@@ -564,8 +476,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
@@ -574,13 +486,13 @@ class OwlData(_DataID):
             pdid = self._get_pdid("mch")
             get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
             result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, freq = 'd', num_col = 2, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
                        
     # 技術指標 個股 (Technical indicators Single)
-    def tis(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
+    def tis(self, sid:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
         '''
         依指定日期區間，撈取指定股票的技術指標數值
         
@@ -601,8 +513,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
@@ -615,14 +527,14 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 1, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, freq = 'd', num_col = 1, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
    
     # 技術指標 多股 (Technical indicators Multi) 
     @OwlError._check_dt(di = 'd')
-    def tim(self, dt:str, colist = None) -> 'DataFrame':
+    def tim(self, dt:str, colist=None) -> 'DataFrame':
         '''
         查詢指定日期，全上市櫃台股的技術指標數值
         
@@ -637,8 +549,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
@@ -647,13 +559,13 @@ class OwlData(_DataID):
             pdid = self._get_pdid("mth")
             get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
             result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, freq = 'd', num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
     # 公司基本資料 多股 (Company information Multi)
-    def cim(self, colist = None) -> 'DataFrame':
+    def cim(self, colist=None) -> 'DataFrame':
         '''
         撈取上市櫃台股的公司基本資料
         
@@ -665,13 +577,12 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
         '''
-        
         try:
             pdid = self._get_pdid("mcm")
             # 獲取資料
@@ -684,7 +595,7 @@ class OwlData(_DataID):
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
     # 股利政策 個股 (Dividend Policy Single)
-    def dps(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
+    def dps(self, sid:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
         '''
         依據指定年度區間，撈取指定股票的配發股利狀況表
         
@@ -705,8 +616,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空
         
@@ -719,14 +630,14 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = 2, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, freq = 'y', num_col = 2, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
     # 股利政策 多股 (Dividend Policy Multi)
     @OwlError._check_dt(di = 'y')
-    def dpm(self, dt:str, colist = None) -> 'DataFrame':
+    def dpm(self, dt:str, colist=None) -> 'DataFrame':
         '''
         依指定年度，撈取全上市櫃台股的配發股利狀況表
         
@@ -741,8 +652,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
@@ -751,13 +662,13 @@ class OwlData(_DataID):
             pdid = self._get_pdid("mcm1")
             get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
             result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, freq = 'y', num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
     # 除權除息 個股 (Exemption Dividend Policy Single)
-    def edps(self, sid:str, bpd:str, epd:str, colist = None) -> 'DataFrame':
+    def edps(self, sid:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
         '''
         依據指定年度區間，撈取指定股票的股東會日期及停止過戶的相關日期
         
@@ -778,8 +689,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
@@ -792,14 +703,14 @@ class OwlData(_DataID):
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, num_col = None, colists = colist, pd_id = pdid)
+                temp = self._check(result = result, freq = 'y', num_col = None, colists = colist, pd_id = pdid)
                 return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
     # 除權除息 多股 (Exemption Dividend Policy Multi)
     @OwlError._check_dt(di = 'y')   
-    def edpm(self, dt:str, colist = None) -> 'DataFrame':
+    def edpm(self, dt:str, colist=None) -> 'DataFrame':
         '''
         依指定日期，撈取全上市櫃台股的股東會日期及停止過戶的相關日期
         
@@ -814,8 +725,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
@@ -825,13 +736,13 @@ class OwlData(_DataID):
             # 獲取資料
             get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
             result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, num_col = None, colists = colist, pd_id = pdid)
+            temp = self._check(result = result, freq = 'y', num_col = None, colists = colist, pd_id = pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
     
     # 即時報價 (Timely Stock Price)
-    def tsp(self, sid:str, colist = None) -> 'DataFrame':
+    def tsp(self, sid:str, colist=None) -> 'DataFrame':
         '''
         撈取指定股票即時股價資訊
         
@@ -846,8 +757,8 @@ class OwlData(_DataID):
         Returns
         ----------
         DataFrame
-        
-        [Notes]
+
+        Notes
         ----------
         - 發生錯誤時，會直接顯示錯誤訊息，回傳變數為空 
         
@@ -858,9 +769,7 @@ class OwlData(_DataID):
             # 獲取資料
             get_data_url = self._token['data_url'] + pdid + "/" + sid
             result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, num_col = 3, colists = colist, pd_id = pdid)
+            temp = self._check(result=result, num_col=3, colists=colist, pd_id=pdid)
             return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
-
-
