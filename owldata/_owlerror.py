@@ -24,7 +24,7 @@ class OwlError():
                 'SidError':'請重新確認您的股票代號是否輸入正確',
                 'ColumnsError':'請重新確認您的欄位名稱是否輸入正確',
                 'ValueError':'日期規則錯誤，請重新確認!!',
-                'PdError':'無商品使用權限，請洽業務人員',
+                'PdError':'請至數據貓頭鷹網站開啟/購買該商品使用權限',
                 'ExError':'操作錯誤，請重新再輸入',
                 'CannotFind':'指定日期不在範圍內'
                 }
