@@ -18,7 +18,7 @@ from ._owlerror import OwlError
 class _DataID():
     def __init__(self):
         # 商品表
-        # self._fp = ''
+        #self._fp = ''
         
         # 商品時間對照表
         self._table_code = {
@@ -30,6 +30,8 @@ class _DataID():
         
         # 商品時間表
         self._table = {}
+        
+        self._pdid_map
 
     # 取得函數與商品對應表
     def _pdid_map(self):
@@ -49,10 +51,13 @@ class _DataID():
         FuncID: ssp-個股股價, msp-多股股價, sby-年度資產負債表(個股), sbq-季度資產負債表(個股)
         pdid: 商品對應的ID
         '''
-        get_data_url = self._token['data_url'] + self._token['ctrlmap']
-        self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
+        get_data_url = self._token['data_url'] + self._token['pythonmap']
+        try:
+            self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
+        except:
+            get_data_url = self._token['data_url'] + self._token['testmap']
+            self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
         return self._fp
-    
     # 取得函數對應商品
     def _get_pdid(self, funcname:str):
         return self._fp.loc[funcname][0]
@@ -62,7 +67,7 @@ class _DataID():
         get_data_url = self._token['data_url'] + self._table_code[freq.lower()]
         if freq.lower() == 'd':
             get_data_url = get_data_url + '/TWA00/999'
-        return self._data_from_owl(get_data_url)
+        return self._data_from_owl(get_data_url) 
     
     # 商品時間頻率對照表
     def _date_freq(self, start:str, end:str, freq = 'd'):
