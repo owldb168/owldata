@@ -27,6 +27,12 @@ class _DataID():
             'q':'PYCtrl-14810a/',
             'y':'PYCtrl-14811a/'
             }
+        self._table_code_test ={
+            'd':'PYCtrl-14892a/',
+            'm':'PYCtrl-14891a/',
+            'q':'PYCtrl-14890a/',
+            'y':'PYCtrl-14889b/'            
+            }
         
         # 商品時間表
         self._table = {}
@@ -65,10 +71,12 @@ class _DataID():
     # 商品時間
     def _date_table(self, freq:str):
         get_data_url = self._token['data_url'] + self._table_code[freq.lower()]
+        data = self._data_from_owl(get_data_url)
+        if type(data) == str:
+            get_data_url = self._token['data_url'] + self._table_code_test[freq.lower()]
         if freq.lower() == 'd':
-            get_data_url = get_data_url + '/TWA00/999'
-        return self._data_from_owl(get_data_url) 
-    
+            get_data_url = get_data_url + '/TWA00/9999'
+        return self._data_from_owl(get_data_url)
     # 商品時間頻率對照表
     def _date_freq(self, start:str, end:str, freq = 'd'):
         season = ['0' + str(x) for x in range(5,13)]
@@ -121,7 +129,7 @@ class _DataID():
             except ValueError:
                 print('ValueError:', OwlError._dicts["ValueError"])
                 return 'error'
-            
+
         if int(start) > int(end):
             print('DateError:',OwlError._dicts['DateError'])
             return 'error'
