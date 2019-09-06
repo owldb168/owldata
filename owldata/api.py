@@ -134,7 +134,6 @@ class OwlData(_DataID):
         '''
         data_result = requests.request("GET", url, headers = self._data_headers)
 
-
         try:
             if (data_result.status_code == 200):
                 data=json.loads(data_result.text)
@@ -199,7 +198,7 @@ class OwlData(_DataID):
                     if '股票代號' not in result.columns:
                         result.sort_values('年度', inplace = True)
                         result.reset_index(drop = True, inplace = True)
-    
+
                 # 數值化
                 if num_col != None:
                     result.iloc[:,num_col:] = result.iloc[:,num_col:].apply(pd.to_numeric)
