@@ -10,6 +10,7 @@
 import requests
 import json 
 import pandas as pd
+from pandas.tseries.offsets import MonthEnd, QuarterEnd, YearEnd
 import datetime
 import os
 
@@ -23,17 +24,17 @@ from ._owltime import _DataID
 pd.set_option('display.float_format', lambda x: '%.2f' % x)
 
 # setting dir 位置
-class __Check_dir():
-    def __init__(self):
-        '''
-        Auto create directory
-        '''
-        self.directory = ['Data']
+# class __Check_dir():
+#     def __init__(self):
+#         '''
+#         Auto create directory
+#         '''
+#         self.directory = ['Data']
 
-    def dir(self):
-        for dirs in self.directory:
-            if not os.path.exists(dirs):
-                os.makedirs(dirs)
+#     def dir(self):
+#         for dirs in self.directory:
+#             if not os.path.exists(dirs):
+#                 os.makedirs(dirs)
 
 # --------------------
 # BLOCK API擷取資料
@@ -144,7 +145,6 @@ class OwlData(_DataID):
         except:
             return 'error'
 
-
     # 修正資料
     def _check(self, result:'DataFrame', freq=None, num_col=2, colists=None, pd_id=None) -> 'DataFrame':
         '''
@@ -174,27 +174,27 @@ class OwlData(_DataID):
             if result.empty:
                 print('SidError:',OwlError._dicts["SidError"])
                 return result
-    
+            
             if result is not 'error':
                 # 日期修正
                 if freq == 'd':
-                    result['日期'] = pd.to_datetime(result['日期'])
+                    result['日期'] = [pd.to_datetime(i) if i !='' else '' for i in result['日期']]
                     if '股票代號' not in result.columns:
                         result.sort_values('日期', inplace = True)
                         result.reset_index(drop = True, inplace = True)
                 elif freq == 'm':
-                    #result['年月'] = pd.to_datetime(result['年月'], format = '%Y%m')
+                    result['年月'] = [pd.to_datetime(i,format='%Y%m')+MonthEnd(1) if i !='' else '' for i in result['年月']]
                     if '股票代號' not in result.columns:
                         result.sort_values('年月', inplace = True)
                         result.reset_index(drop = True, inplace = True)
                 elif freq == 'q':
-                    #result['年季'] = result['年季'].apply(lambda x: x[0:4]+x[4:6].replace('0','Q'))
-                    #result['年季'] = pd.to_datetime(result['年季'])
+                    result['年季'] = result['年季'].apply(lambda x: x[0:4]+x[4:6].replace('0','Q'))
+                    result['年季'] = [pd.to_datetime(i)+QuarterEnd(1) if i !='' else '' for i in result['年季']]
                     if '股票代號' not in result.columns:
                         result.sort_values('年季', inplace = True)
                         result.reset_index(drop = True, inplace = True)
                 elif freq == 'y':
-                    #result['年度'] = pd.to_datetime(result['年度']+'1231', format = '%Y%m%d')
+                    result['年度'] = [pd.to_datetime(i)+YearEnd(1) if i !='' else '' for i in result['年度']]
                     if '股票代號' not in result.columns:
                         result.sort_values('年度', inplace = True)
                         result.reset_index(drop = True, inplace = True)
@@ -260,7 +260,7 @@ class OwlData(_DataID):
 
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
-            
+   
     # 多股每日收盤行情 (Multi Stock Price)
     @OwlError._check_dt(di = 'd')
     def msp(self, dt:str, colist=None) -> 'DataFrame':
@@ -294,21 +294,21 @@ class OwlData(_DataID):
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
 
     # 個股財務簡表 (Financial Statements Single )
-    def fis(self, di:str, sid:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
+    def fis(self, sid:str, di:str, bpd:str, epd:str, colist=None) -> 'DataFrame':
         '''
         依據 di 決定查詢資料頻率，並依股票代號，撈取指定區間的財務報表資訊
         y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
         
         Parameters
-        ----------
+        ----------            
+        :param sid: str
+            - 台股股票代號
+            
         :param di: str
             - 查詢資料時間頻率，y = 年度, q = 季度, m = 月份
                 - Y : 年度, 格式 : yyyy
                 - Q : 季度, 格式 : yyyyqq
-                - M : 月, 格式 : yyyymm
-            
-        :param sid: str
-            - 台股股票代號
+                - M : 月, 格式 : yyyymm    
             
         :param bpd: str
             - 指定一個交易起始日
@@ -660,7 +660,7 @@ class OwlData(_DataID):
         '''
         try:
             pdid = self._get_pdid("mcm1")
-            get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
+            get_data_url = self._token['data_url'] + 'date/' + dt + '1231/' + pdid
             result = self._data_from_owl(get_data_url)
             temp = self._check(result = result, freq = 'y', num_col = 5, colists = colist, pd_id = pdid)
             return temp
