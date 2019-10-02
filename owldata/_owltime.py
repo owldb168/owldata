@@ -18,7 +18,7 @@ from ._owlerror import OwlError
 class _DataID():
     def __init__(self):
         # 商品表
-        #self._fp = ''
+        #self._fp
         
         # 商品時間對照表
         self._table_code = {
@@ -27,6 +27,7 @@ class _DataID():
             'q':'PYCtrl-14810a/',
             'y':'PYCtrl-14811a/'
             }
+        
         self._table_code_test ={
             'd':'PYCtrl-14892a/',
             'm':'PYCtrl-14891a/',
@@ -37,7 +38,6 @@ class _DataID():
         # 商品時間表
         self._table = {}
         
-        self._pdid_map
 
     # 取得函數與商品對應表
     def _pdid_map(self):
@@ -64,6 +64,7 @@ class _DataID():
             get_data_url = self._token['data_url'] + self._token['testmap']
             self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
         return self._fp
+
     # 取得函數對應商品
     def _get_pdid(self, funcname:str):
         return self._fp.loc[funcname][0]
@@ -77,13 +78,16 @@ class _DataID():
         if freq.lower() == 'd':
             get_data_url = get_data_url + '/TWA00/9999'
         return self._data_from_owl(get_data_url)
-    # 商品時間頻率對照表
+    
+    # 新增對應表
+    def _get_table(self, freq:str):
+        if freq not in self._table.keys():
+            self._table[freq] = self._date_table(freq)
+
+    # 商品時間頻率
     def _date_freq(self, start:str, end:str, freq = 'd'):
         season = ['0' + str(x) for x in range(5,13)]
 
-        if freq.lower() not in self._table.keys():
-            self._table[freq.lower()] = self._date_table(freq.lower())
-        
         if freq.lower() == 'y':
             if len(start) != 4 or len(end) != 4:
                 print('YearError:',OwlError._dicts['YearError'])
@@ -136,6 +140,7 @@ class _DataID():
         
         temp = self._table[freq.lower()].copy()
         temp = temp[temp[temp.columns[0]].between(start, end)]
+        
         if len(temp) == 0:
             print('CannotFind:', OwlError._dicts["CannotFind"])
             return 'error'

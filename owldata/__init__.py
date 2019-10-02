@@ -12,28 +12,26 @@ from .__version__ import __version__
 
 __docformat__ = 'restructuredtext'
 __doc__ = '''
-OwlData 數據貓頭鷹 API
-==============================
+# OwlData 數據貓頭鷹 API
 
-## 數據貓頭鷹官方網站: https://owl.cmoney.com.tw/Owl/
+數據貓頭鷹官方網站: https://owl.cmoney.com.tw/Owl/
 
-**owldata** 提供一個穩定且快速的介面獲取數據貓頭鷹任何資料
+GitHub: https://github.com/owldb168/owldata
 
-Quick Start
------------
+OwlData 提供一個穩定且快速的介面獲取數據貓頭鷹任何資料
 
-import owldata
+使用注意事項:
 
-# 輸入數據貓頭鷹會員 AppID & 應用程式密鑰
-appid = '請輸入 AppID'
-appsecret = '請輸入 應用程式密鑰'
+- Python 免費版資料期間限制於2年，欄位詳見 GitHub或數據貓頭鷹官網
 
-# 引用函數取得資料
-owlapp = owldata.OwlData(appid, appsecret)
+- 免費版試用期間為 90日，過期則需要再等 2天才能再次申請免費試用
 
-# 擷取台積電股價 from 2019/08/12 to 2019/08/13
-stock_price = owlapp.ssp("2330", "20190812", "20190813")
-stock_price.head()
+- Python 付費版資料期間為 10年，欄位詳見 GitHub或數據貓頭鷹官網
 
+有任何相關錯誤回報:
+
+- E-mail：service@cmoney.com.tw
+- 請撥打 02-8252-6620 分機241
+- 星期一-星期五: 早上9:00-下午6:00, 除了國定假日以外
 
 '''

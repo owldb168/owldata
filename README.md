@@ -320,7 +320,7 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     <br>y(年)、 q(季) 是撈取財務報表資訊；m(月) 是撈取營收相關資訊
 
     ```python
-    OwlData.fis(di:str, sid:str, bpd:str, epd:str, colist:list) -> DataFrame
+    OwlData.fis(sid:str, di:str, bpd:str, epd:str, colist:list) -> DataFrame
     ```
 
     <table>
