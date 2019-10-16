@@ -2,6 +2,7 @@
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+.DS_Store
 
 # Python:
 *.py[cod]

@@ -61,6 +61,7 @@ class OwlData(_DataID):
         return '貓頭鷹資料庫連線狀態: {}'.format(str(self.status_code))
     
     def _request(self,*args,**kargs):
+        '''當連線出現異常時，重新啟動下載機制'''
         i=3
         while i >=0:
             try:
@@ -71,6 +72,7 @@ class OwlData(_DataID):
 
     # Token 取得
     def _request_token_authorization(self) -> int:
+        '''請求權限交換'''
         self._token_result = self._request("POST",self._token['token_url'],
                                         data = self._token['token_params'],
                                         headers = self._token['token_headers'])
@@ -129,6 +131,14 @@ class OwlData(_DataID):
         '''
         data_result = self._request("GET", url, headers = self._data_headers)
         
+        # 若逾時連線，則重新再次連線一次
+        try:
+            if data_result.status_code == 200:
+                pass
+        except:
+            data_result = self._request("GET", url, headers = self._data_headers)
+        
+        # status code 下載判別狀態
         try:
             if data_result.status_code == 200:
                 data=json.loads(data_result.text)
@@ -148,18 +158,23 @@ class OwlData(_DataID):
         Parameters
         ----------
         :param result: DataFrame
+
             - 輸入原始表格
             
         :param freq: str
+
             - 表格頻率
             
         :param num_col: int
+
             - 數值化資料欄位起點
             
         :param colists: list, default None
+
             - 填入欲查看的欄位名稱，未寫輸入則取全部欄位
             
         :param pd_id: str
+
             - 商品代碼
             
         Returns
@@ -191,7 +206,7 @@ class OwlData(_DataID):
                     if '股票代號' not in result.columns:
                         result.sort_values('年季', inplace = True)
                         result.reset_index(drop = True, inplace = True)
-                   
+                    
                 elif freq == 'y':
                     result['年度'] = [pd.to_datetime(i)+YearEnd(1) if i !='' else '' for i in result['年度']]
                     if '股票代號' not in result.columns:
@@ -215,7 +230,9 @@ class OwlData(_DataID):
         except ValueError:
             print('ValueError:', OwlError._dicts["ValueError"])
         except KeyError:
-            print('ColumnsError:', OwlError._dicts["ColumnsError"])                   
+            print('ColumnsError:', OwlError._dicts["ColumnsError"])
+        # except AttributeError:
+        #     print('CannotFind:', OwlError._dicts['CannotFind'])                  
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pd_id)
     
@@ -260,16 +277,14 @@ class OwlData(_DataID):
             # 下載付費版
             if (dt != 'error'):
                 pdid = self._get_pdid("ssp")
-                # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
                 
-            # 下載不到付費板時
-            if result == 'error':
-                pdid = self._get_pdid_test("ssp")
-                # 獲取資料
-                get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
-                result = self._data_from_owl(get_data_url)
+                # 下載不到付費板時
+                if type(result) == str:
+                    pdid = self._get_pdid_test("ssp")
+                    get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
+                    result = self._data_from_owl(get_data_url)
 
             # 資料修正
             temp = self._check(result = result, freq = 'd', num_col = 2, colists = colist, pd_id = pdid)
@@ -307,11 +322,20 @@ class OwlData(_DataID):
 
         '''
         try:
+            # 下載付費版
             pdid = self._get_pdid("msp")
             get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
             result = self._data_from_owl(get_data_url)
+                
+            # 下載不到付費板時
+            if type(result) == str:
+                pdid = self._get_pdid_test("msp")
+                get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
+                result = self._data_from_owl(get_data_url)
+
             temp = self._check(result = result, freq = 'd', num_col = 3, colists = colist, pd_id = pdid)
             return temp
+            
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
 
@@ -379,8 +403,26 @@ class OwlData(_DataID):
                 get_data_url=self._token['data_url']+"date/"+epd+"01/"+pdid+"/"+sid+"/"+dt
 
             if (dt != 'error'):
-                # 獲取資料
+                # 下載付費版
                 result = self._data_from_owl(get_data_url)
+                print(result)
+                
+                # 下載不到付費板時
+                if type(result) == str:
+                    if di.lower() == 'y':
+                        pdid = self._get_pdid_test("sby")
+                        get_data_url=self._token['data_url']+"date/"+epd+"0101/"+pdid+"/"+sid+"/"+dt
+                    
+                    elif di.lower() == 'q':
+                        pdid = self._get_pdid_test("sbq")
+                        get_data_url=self._token['data_url']+"date/"+epd+"01/"+pdid+"/"+sid+"/"+dt
+                        
+                    elif di.lower() == 'm':
+                        pdid = self._get_pdid_test("sbm")
+                        get_data_url=self._token['data_url']+"date/"+epd+"01/"+pdid+"/"+sid+"/"+dt
+                    
+                    result = self._data_from_owl(get_data_url)
+                
                 temp = self._check(result = result, freq = di.lower(), num_col = 1, colists = colist, pd_id = pdid)
                 return temp
         except:
@@ -432,6 +474,7 @@ class OwlData(_DataID):
             elif di.lower() == 'q':
                 pdid = self._get_pdid("mbq")
                 self._get_table('q')
+
                 if int(dt[4:6]) == 1:
                     pass
                 elif int(dt[4:6]) == 2:
@@ -440,6 +483,7 @@ class OwlData(_DataID):
                     dt = str(int(dt)+4)
                 elif int(dt[4:6]) == 4:
                     dt = str(int(dt)+6)
+                
                 get_data_url=self._token['data_url']+"date/"+dt+"01/"+pdid
                 
             elif di.lower() == 'm':
@@ -447,10 +491,30 @@ class OwlData(_DataID):
                 self._get_table('m')
                 get_data_url=self._token['data_url']+"date/"+dt+"01/"+pdid
                 
-            # 獲取資料
-            result = self._data_from_owl(get_data_url)
-            temp = self._check(result = result, freq = di.lower(), num_col = 3, colists = colist, pd_id = pdid)
-            return temp
+            # 下載付費版
+            if get_data_url:
+                result = self._data_from_owl(get_data_url)
+
+
+                # 下載不到付費板時
+                if type(result) == str:
+                    if di.lower() == 'y':
+                        pdid = self._get_pdid_test("mby")
+                        get_data_url=self._token['data_url']+"date/"+dt+"0101/"+pdid
+                    
+                    elif di.lower() == 'q':
+                        pdid = self._get_pdid_test("mbq")
+                        get_data_url=self._token['data_url']+"date/"+dt+"01/"+pdid
+                        
+                    elif di.lower() == 'm':
+                        pdid = self._get_pdid_test("mbm")
+                        get_data_url=self._token['data_url']+"date/"+dt+"01/"+pdid
+
+                    # 下載免費版
+                    result = self._data_from_owl(get_data_url)
+
+                temp = self._check(result = result, freq = di.lower(), num_col = 3, colists = colist, pd_id = pdid)
+                return temp
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
         
@@ -488,14 +552,22 @@ class OwlData(_DataID):
         
         '''
         try:
-            pdid = self._get_pdid("sch")
+            # 下載時間對應表
             self._get_table('d')
             dt = self._date_freq(bpd, epd, 'd')
             
             if (dt != 'error'):
-                # 獲取資料
+                # 下載付費版
+                pdid = self._get_pdid("sch")
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
+                
+                # 下載不到付費板時
+                if type(result) == str:
+                    pdid = self._get_pdid_test("sch")
+                    get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
+                    result = self._data_from_owl(get_data_url)
+
                 temp = self._check(result = result, freq = 'd', num_col = 1, colists = colist, pd_id = pdid)
                 return temp
         except:
@@ -528,9 +600,17 @@ class OwlData(_DataID):
         
         '''
         try:
+            # 下載付費版
             pdid = self._get_pdid("mch")
             get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
             result = self._data_from_owl(get_data_url)
+            
+            # 下載不到付費板時
+            if type(result) == str:
+                pdid = self._get_pdid_test("mch")
+                get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
+                result = self._data_from_owl(get_data_url)
+
             temp = self._check(result = result, freq = 'd', num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
@@ -571,14 +651,22 @@ class OwlData(_DataID):
         
         '''
         try:
-            pdid=self._get_pdid("sth")
+            # 下載時間對應表
             self._get_table('d')
             dt = self._date_freq(bpd, epd, 'd')
             
             if (dt != 'error'):
-                # 獲取資料
+                # 下載付費版
+                pdid=self._get_pdid("sth")
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
+                
+                # 下載不到付費板時
+                if type(result) == str:
+                    pdid=self._get_pdid_test("sth")
+                    get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
+                    result = self._data_from_owl(get_data_url)
+
                 temp = self._check(result = result, freq = 'd', num_col = 1, colists = colist, pd_id = pdid)
                 return temp
         except:
@@ -615,6 +703,13 @@ class OwlData(_DataID):
             pdid = self._get_pdid("mth")
             get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
             result = self._data_from_owl(get_data_url)
+            
+            # 下載不到付費板時
+            if type(result) == str:
+                pdid = self._get_pdid_test("mth")
+                get_data_url = self._token['data_url'] + 'date/' + dt + '/' + pdid
+                result = self._data_from_owl(get_data_url)
+
             temp = self._check(result = result, freq = 'd', num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
@@ -643,11 +738,17 @@ class OwlData(_DataID):
         
         '''
         try:
+            # 下載付費版
             pdid = self._get_pdid("mcm")
-            # 獲取資料
             get_data_url = self._token['data_url']  + pdid
-            
             result = self._data_from_owl(get_data_url)
+            
+            # 下載不到付費板時
+            if type(result) == str:
+                pdid = self._get_pdid_test("mcm")
+                get_data_url = self._token['data_url']  + pdid
+                result = self._data_from_owl(get_data_url)
+
             temp = self._check(result = result, num_col = -1, colists = colist, pd_id = pdid)
             return temp
         except:
@@ -687,14 +788,22 @@ class OwlData(_DataID):
         
         '''
         try:
-            pdid = self._get_pdid("scm1")
+            # 下載時間對應表
             self._get_table('y')
             dt = self._date_freq(bpd, epd, 'y')
             
             if (dt != 'error'):
-                # 獲取資料
+                # 下載付費版
+                pdid = self._get_pdid("scm1")
                 get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
+                
+                # 下載不到付費板時
+                if type(result) == str:
+                    pdid = self._get_pdid_test("scm1")
+                    get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
+                    result = self._data_from_owl(get_data_url)
+
                 temp = self._check(result = result, freq = 'y', num_col = 3, colists = colist, pd_id = pdid)
                 return temp
         except:
@@ -730,6 +839,13 @@ class OwlData(_DataID):
             pdid = self._get_pdid("mcm1")
             get_data_url = self._token['data_url'] + 'date/' + dt + '1231/' + pdid
             result = self._data_from_owl(get_data_url)
+            
+            # 下載不到付費板時
+            if type(result) == str:
+                pdid = self._get_pdid_test("mcm1")
+                get_data_url = self._token['data_url'] + 'date/' + dt + '1231/' + pdid
+                result = self._data_from_owl(get_data_url)
+
             temp = self._check(result = result, freq = 'y', num_col = 5, colists = colist, pd_id = pdid)
             return temp
         except:
@@ -769,14 +885,22 @@ class OwlData(_DataID):
         
         '''
         try:
-            pdid = self._get_pdid("scm2")
+            # 下載時間對應表
             self._get_table('y')
             dt = self._date_freq(bpd, epd, 'y')
             
             if (dt != 'error'):
-                # 獲取資料
+                # 下載付費版
+                pdid = self._get_pdid("scm2")
                 get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
+                
+                # 下載不到付費板時
+                if type(result) == str:
+                    pdid = self._get_pdid_test("scm2")
+                    get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
+                    result = self._data_from_owl(get_data_url)
+
                 temp = self._check(result = result, freq = 'y', num_col = None, colists = colist, pd_id = pdid)
                 return temp
         except:
@@ -809,10 +933,17 @@ class OwlData(_DataID):
         
         '''
         try:
+            # 下載付費版
             pdid = self._get_pdid("mcm2")
-            # 獲取資料
             get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
             result = self._data_from_owl(get_data_url)
+            
+            # 下載不到付費板時
+            if type(result) == str:
+                pdid = self._get_pdid_test("mcm2")
+                get_data_url = self._token['data_url'] + 'date/' + dt + '0101/' + pdid
+                result = self._data_from_owl(get_data_url)
+
             temp = self._check(result = result, freq = 'y', num_col = None, colists = colist, pd_id = pdid)
             return temp
         except:
@@ -843,9 +974,8 @@ class OwlData(_DataID):
         
         '''
         try:
+            # 下載付費版 (僅只有付費版才能使用這項功能)
             pdid = self._get_pdid("mnp")
-            
-            # 獲取資料
             get_data_url = self._token['data_url'] + pdid + "/" + sid
             result = self._data_from_owl(get_data_url)
             temp = self._check(result=result, num_col=3, colists=colist, pd_id=pdid)
