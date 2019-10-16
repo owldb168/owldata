@@ -18,17 +18,12 @@ from ._owlerror import OwlError
 class _DataID():
     def __init__(self):
         # 商品表
-        #self._fp
+        #self._fp 付費版函數對應商品
+        
+        #self._test 免費版函數對應商品
         
         # 商品時間對照表
-        self._table_code = {
-            'd':'PYCtrl-14806a/',
-            'm':'PYCtrl-14809a/',
-            'q':'PYCtrl-14810a/',
-            'y':'PYCtrl-14811a/'
-            }
-        
-        self._table_code_test ={
+        self._table_code ={
             'd':'PYCtrl-14892a/',
             'm':'PYCtrl-14891a/',
             'q':'PYCtrl-14890a/',
@@ -38,7 +33,6 @@ class _DataID():
         # 商品時間表
         self._table = {}
         
-
     # 取得函數與商品對應表
     def _pdid_map(self):
         '''
@@ -57,29 +51,31 @@ class _DataID():
         FuncID: ssp-個股股價, msp-多股股價, sby-年度資產負債表(個股), sbq-季度資產負債表(個股)
         pdid: 商品對應的ID
         '''
+        # 付費版資料表 url
         get_data_url = self._token['data_url'] + self._token['pythonmap']
-        try:
-            self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
-        except:
-            get_data_url = self._token['data_url'] + self._token['testmap']
-            self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
-        return self._fp
+        self._fp = self._data_from_owl(get_data_url).set_index("FuncID")
+        
+        # 免費版資料表 url
+        get_data_url = self._token['data_url'] + self._token['testmap']
+        self._test = self._data_from_owl(get_data_url).set_index("FuncID")
 
-    # 取得函數對應商品
+    # 取得付費版函數對應商品
     def _get_pdid(self, funcname:str):
         return self._fp.loc[funcname][0]
+    
+    # 取得免費版函數對應商品
+    def _get_pdid_test(self, funcname:str):
+        return self._test.loc[funcname][0]
     
     # 商品時間
     def _date_table(self, freq:str):
         get_data_url = self._token['data_url'] + self._table_code[freq.lower()]
         data = self._data_from_owl(get_data_url)
-        if type(data) == str:
-            get_data_url = self._token['data_url'] + self._table_code_test[freq.lower()]
         if freq.lower() == 'd':
             get_data_url = get_data_url + '/TWA00/9999'
         return self._data_from_owl(get_data_url)
     
-    # 新增對應表
+    # 新增時間對應表
     def _get_table(self, freq:str):
         if freq not in self._table.keys():
             self._table[freq] = self._date_table(freq)

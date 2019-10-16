@@ -253,17 +253,28 @@ class OwlData(_DataID):
         
         '''
         try:
-            pdid = self._get_pdid("ssp")
+            # 下載時間對應表
             self._get_table('d')
             dt = self._date_freq(bpd, epd, 'd')
             
+            # 下載付費版
             if (dt != 'error'):
+                pdid = self._get_pdid("ssp")
                 # 獲取資料
                 get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
                 result = self._data_from_owl(get_data_url)
-                temp = self._check(result = result, freq = 'd', num_col = 2, colists = colist, pd_id = pdid)
-                temp = temp[temp['日期'].isin(self._table['d']['日期'])]
-                return temp
+                
+            # 下載不到付費板時
+            if result == 'error':
+                pdid = self._get_pdid_test("ssp")
+                # 獲取資料
+                get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
+                result = self._data_from_owl(get_data_url)
+
+            # 資料修正
+            temp = self._check(result = result, freq = 'd', num_col = 2, colists = colist, pd_id = pdid)
+            temp = temp[temp['日期'].isin(self._table['d']['日期'])]
+            return temp
 
         except:
             print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
