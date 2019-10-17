@@ -19,6 +19,7 @@
     - [Code Example](#code-example)
   - [Quick Start](#quick-start)
   - [Data Function](#data-function)
+  - [Notes](#notes)
   - [Contribute](#contribute)
   
 ## Dependencies
@@ -1851,6 +1852,22 @@ OwlData 使用方法，使用 OwlData 不同方法擷取所需要的資料，並
     ```
 
 <div style="text-align: right"> <a href = #owldata-%e6%95%b8%e6%93%9a%e8%b2%93%e9%a0%ad%e9%b7%b9-api> top </a> </div>
+
+## Notes
+
+- Python 免費版資料期間限制於2年，欄位詳見 GitHub或數據貓頭鷹官網
+
+- 免費版試用期間為 90 日，過期則需要再等 2 日才能再次申請免費試用
+
+- Python 付費版資料期間為 10 年，欄位詳見 GitHub或數據貓頭鷹官網
+
+- 若付費本出現無法擷取資料的情況，可能是因為商品清單或是交易週期對應表過期所導致，請向客服進行聯繫 (預設過期天數為999天，等待期限 1 日)
+
+**有任何相關錯誤請聯繫:**
+
+- E-mail：service@cmoney.com.tw
+- 請撥打 02-8252-6620 分機241
+- 星期一-星期五: 早上9:00-下午6:00, 除了國定假日以外
 
 ## Contribute
 

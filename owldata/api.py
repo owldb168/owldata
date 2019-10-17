@@ -234,7 +234,7 @@ class OwlData(_DataID):
         # except AttributeError:
         #     print('CannotFind:', OwlError._dicts['CannotFind'])                  
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pd_id)
+            print('PdError:', OwlError._dicts["PdError"])
     
     # 個股日收盤行情 (Single Stock Price)
     def ssp(self, sid:str, bpd:str, epd:str, colist=None) -> pd.DataFrame:
@@ -283,16 +283,19 @@ class OwlData(_DataID):
                 # 下載不到付費板時
                 if type(result) == str:
                     pdid = self._get_pdid_test("ssp")
-                    get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
+                    get_data_url = self._token['data_url']+pdid+"/"+sid+"/"+'500'
                     result = self._data_from_owl(get_data_url)
+                    
 
             # 資料修正
             temp = self._check(result = result, freq = 'd', num_col = 2, colists = colist, pd_id = pdid)
             temp = temp[temp['日期'].isin(self._table['d']['日期'])]
+            temp = temp[temp[temp.columns[0]].between(bpd, epd)]
+            temp.reset_index(drop=True,inplace=True)
             return temp
 
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
    
     # 多股每日收盤行情 (Multi Stock Price)
     @OwlError._check_dt(di = 'd')
@@ -337,7 +340,7 @@ class OwlData(_DataID):
             return temp
             
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
 
     # 個股財務簡表 (Financial Statements Single )
     def fis(self, sid:str, di:str, bpd:str, epd:str, colist=None) -> pd.DataFrame:
@@ -405,28 +408,32 @@ class OwlData(_DataID):
             if (dt != 'error'):
                 # 下載付費版
                 result = self._data_from_owl(get_data_url)
-                print(result)
                 
                 # 下載不到付費板時
                 if type(result) == str:
                     if di.lower() == 'y':
                         pdid = self._get_pdid_test("sby")
-                        get_data_url=self._token['data_url']+"date/"+epd+"0101/"+pdid+"/"+sid+"/"+dt
+                        get_data_url=self._token['data_url']+pdid+"/"+sid+"/"+'2'
+                        bpd,epd = self._time_format(bpd,epd,'y')
                     
                     elif di.lower() == 'q':
                         pdid = self._get_pdid_test("sbq")
-                        get_data_url=self._token['data_url']+"date/"+epd+"01/"+pdid+"/"+sid+"/"+dt
-                        
+                        get_data_url=self._token['data_url']+pdid+"/"+sid+"/"+'8'
+                        bpd,epd = self._time_format(bpd,epd,'q')
+
                     elif di.lower() == 'm':
                         pdid = self._get_pdid_test("sbm")
-                        get_data_url=self._token['data_url']+"date/"+epd+"01/"+pdid+"/"+sid+"/"+dt
-                    
+                        get_data_url=self._token['data_url']+pdid+"/"+sid+"/"+'24'
+                        bpd,epd = self._time_format(bpd,epd,'m')
+                        
                     result = self._data_from_owl(get_data_url)
                 
                 temp = self._check(result = result, freq = di.lower(), num_col = 1, colists = colist, pd_id = pdid)
+                temp = temp[temp[temp.columns[0]].between(bpd, epd)]
+                temp.reset_index(drop=True,inplace=True)
                 return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
     
     # 多股財務簡表 (Financial Statements Multi)
     @OwlError._check_di
@@ -516,7 +523,7 @@ class OwlData(_DataID):
                 temp = self._check(result = result, freq = di.lower(), num_col = 3, colists = colist, pd_id = pdid)
                 return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
         
     # 法人籌碼個股歷史資料 (Corporate Chip Single)
     def chs(self, sid:str, bpd:str, epd:str, colist=None) -> pd.DataFrame:
@@ -565,13 +572,15 @@ class OwlData(_DataID):
                 # 下載不到付費板時
                 if type(result) == str:
                     pdid = self._get_pdid_test("sch")
-                    get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
+                    get_data_url = self._token['data_url']+pdid+"/"+sid+"/"+'500'
                     result = self._data_from_owl(get_data_url)
 
                 temp = self._check(result = result, freq = 'd', num_col = 1, colists = colist, pd_id = pdid)
+                temp = temp[temp[temp.columns[0]].between(bpd, epd)]
+                temp.reset_index(drop=True,inplace=True)
                 return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
 
     # 法人籌碼多股歷史資料 (Corporate Chip Multi)
     @OwlError._check_dt(di = 'd')
@@ -614,7 +623,7 @@ class OwlData(_DataID):
             temp = self._check(result = result, freq = 'd', num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
                        
     # 技術指標 個股 (Technical indicators Single)
     def tis(self, sid:str, bpd:str, epd:str, colist=None) -> pd.DataFrame:
@@ -664,13 +673,15 @@ class OwlData(_DataID):
                 # 下載不到付費板時
                 if type(result) == str:
                     pdid=self._get_pdid_test("sth")
-                    get_data_url = self._token['data_url']+"date/" + epd + "/" + pdid + "/" + sid + "/" + dt
+                    get_data_url = self._token['data_url']+pdid+"/"+sid+"/"+'500'
                     result = self._data_from_owl(get_data_url)
 
                 temp = self._check(result = result, freq = 'd', num_col = 1, colists = colist, pd_id = pdid)
+                temp = temp[temp[temp.columns[0]].between(bpd, epd)]
+                temp.reset_index(drop=True,inplace=True)
                 return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
    
     # 技術指標 多股 (Technical indicators Multi) 
     @OwlError._check_dt(di = 'd')
@@ -713,7 +724,7 @@ class OwlData(_DataID):
             temp = self._check(result = result, freq = 'd', num_col = 3, colists = colist, pd_id = pdid)
             return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
     
     # 公司基本資料 多股 (Company information Multi)
     def cim(self, colist=None) -> pd.DataFrame:
@@ -752,7 +763,7 @@ class OwlData(_DataID):
             temp = self._check(result = result, num_col = -1, colists = colist, pd_id = pdid)
             return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
     
     # 股利政策 個股 (Dividend Policy Single)
     def dps(self, sid:str, bpd:str, epd:str, colist=None) -> pd.DataFrame:
@@ -801,13 +812,16 @@ class OwlData(_DataID):
                 # 下載不到付費板時
                 if type(result) == str:
                     pdid = self._get_pdid_test("scm1")
-                    get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
+                    get_data_url = self._token['data_url']+pdid+"/"+sid+"/"+'2'
                     result = self._data_from_owl(get_data_url)
+                    bpd,epd = self._time_format(bpd,epd,'y')
 
                 temp = self._check(result = result, freq = 'y', num_col = 3, colists = colist, pd_id = pdid)
+                temp = temp[temp[temp.columns[0]].between(bpd, epd)]
+                temp.reset_index(drop=True,inplace=True)
                 return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
     
     # 股利政策 多股 (Dividend Policy Multi)
     @OwlError._check_dt(di = 'y')
@@ -849,7 +863,7 @@ class OwlData(_DataID):
             temp = self._check(result = result, freq = 'y', num_col = 5, colists = colist, pd_id = pdid)
             return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
 
     # 除權除息 個股 (Exemption Dividend Policy Single)
     def edps(self, sid:str, bpd:str, epd:str, colist=None) -> pd.DataFrame:
@@ -898,13 +912,16 @@ class OwlData(_DataID):
                 # 下載不到付費板時
                 if type(result) == str:
                     pdid = self._get_pdid_test("scm2")
-                    get_data_url = self._token['data_url']+"date/" + epd + '0101' + "/" + pdid + "/" + sid + "/" + dt
+                    get_data_url = self._token['data_url']+pdid+"/"+sid+"/"+'2'
                     result = self._data_from_owl(get_data_url)
+                    bpd,epd = self._time_format(bpd,epd,'y')
 
                 temp = self._check(result = result, freq = 'y', num_col = None, colists = colist, pd_id = pdid)
+                temp = temp[temp[temp.columns[0]].between(bpd, epd)]
+                temp.reset_index(drop=True,inplace=True)
                 return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
     
     # 除權除息 多股 (Exemption Dividend Policy Multi)
     @OwlError._check_dt(di = 'y')   
@@ -947,7 +964,7 @@ class OwlData(_DataID):
             temp = self._check(result = result, freq = 'y', num_col = None, colists = colist, pd_id = pdid)
             return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])
     
     # 即時報價 (Timely Stock Price)
     def tsp(self, sid:str, colist=None) -> pd.DataFrame:
@@ -981,4 +998,4 @@ class OwlData(_DataID):
             temp = self._check(result=result, num_col=3, colists=colist, pd_id=pdid)
             return temp
         except:
-            print('PdError:', OwlError._dicts["PdError"]+", 商品代碼: " + pdid)
+            print('PdError:', OwlError._dicts["PdError"])

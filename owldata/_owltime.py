@@ -9,6 +9,7 @@
 
 import datetime
 import pandas as pd
+from pandas.tseries.offsets import MonthEnd, QuarterEnd, YearEnd
 from ._owlerror import OwlError
 
 # --------------------
@@ -24,10 +25,10 @@ class _DataID():
         
         # 商品時間對照表
         self._table_code ={
-            'd':'PYCtrl-14892a/',
-            'm':'PYCtrl-14891a/',
-            'q':'PYCtrl-14890a/',
-            'y':'PYCtrl-14889b/'            
+            'd':'PYCtrl-14806a/',
+            'm':'PYCtrl-14809a/',
+            'q':'PYCtrl-14810a/',
+            'y':'PYCtrl-14811a/'            
             }
         
         # 商品時間表
@@ -82,7 +83,7 @@ class _DataID():
 
     # 商品時間頻率
     def _date_freq(self, start:str, end:str, freq = 'd'):
-        season = ['0' + str(x) for x in range(5,13)]
+        season = ['05','06','07','08','09','10','11','12']
 
         if freq.lower() == 'y':
             if len(start) != 4 or len(end) != 4:
@@ -142,4 +143,23 @@ class _DataID():
             return 'error'
         return str(len(temp))
 
-        
+    def _time_format(self, start:str, end:str, freq = 'd'):
+        '''轉換日期格式'''
+        if freq == 'd':
+            pass
+                
+        elif freq == 'm':
+            start = pd.to_datetime(start,format='%Y%m')+MonthEnd(1)
+            end = pd.to_datetime(end,format='%Y%m')+MonthEnd(1)
+
+        elif freq == 'q':
+            start = start[0:4]+start[4:6].replace('0','Q')
+            start = pd.to_datetime(start)+QuarterEnd(1)
+            
+            end = end[0:4]+end[4:6].replace('0','Q')
+            end = pd.to_datetime(end)+QuarterEnd(1)
+
+        elif freq == 'y':
+            start = pd.to_datetime(start)+YearEnd(1)
+            end = pd.to_datetime(end)+YearEnd(1)
+        return start,end

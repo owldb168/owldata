@@ -60,7 +60,7 @@ class OwlError():
         def inner_function(func):
             @wraps(func)
             def wrap(self, dt, colist = None):
-                season = ['0' + str(x) for x in range(5,13)]
+                season = ['05','06','07','08','09','10','11','12']
                 
                 if di.lower() == 'y':
                     if len(dt) != 4:
@@ -108,7 +108,7 @@ class OwlError():
         @wraps(func)
         def wrap(self, di, dt, colist = None):
             
-            season = ['0' + str(x) for x in range(5,13)]
+            season = ['05','06','07','08','09','10','11','12']
             
             if di.lower() == 'y':
                 if len(dt) != 4:
